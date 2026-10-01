@@ -9,6 +9,14 @@
 <meta property="og:description" content="선 하나 긋고, 공을 떨어뜨리고, 전 세계와 0.001초를 다툰다.">
 <meta property="og:image" content="https://hypercasting.github.io/highlowball-privacy/play/img/feature.png">
 <link rel="icon" href="img/icon.png">
+<!-- Google tag (gtag.js): 방문 수와 스토어 버튼 클릭(store_click) 측정 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-X80FP4KGVT"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-X80FP4KGVT');
+</script>
 <style>
 :root{--bg:#0b0f1d;--panel:#141a2e;--ink:#eef2ff;--muted:#9aa6c8;--neon:#3ff0ff;--hot:#ff4fd8;--go:#3ddc84}
 *{box-sizing:border-box}
@@ -51,7 +59,7 @@ footer a{color:var(--muted)}
 
   <div class="cta">
     <a class="btn" id="play" href="https://play.google.com/store/apps/details?id=com.hypercasting.highlowball&referrer=utm_source%3Dlanding%26utm_medium%3Dweb" data-ko="Google Play에서 받기" data-en="Get it on Google Play">Google Play에서 받기</a>
-    <span class="note" data-ko="안드로이드 · 곧 정식 출시 (스토어 페이지가 아직 안 열리면 며칠 뒤 다시 와 주세요)" data-en="Android · launching soon (if the store page isn't open yet, check back in a few days)">안드로이드 · 곧 정식 출시 (스토어 페이지가 아직 안 열리면 며칠 뒤 다시 와 주세요)</span>
+    <span class="note" data-ko="안드로이드 · 구글 플레이 출시! 무료" data-en="Android · Out now on Google Play · Free">안드로이드 · 구글 플레이 출시! 무료</span>
   </div>
 
   <div class="shots" id="shots"></div>
@@ -66,6 +74,7 @@ footer a{color:var(--muted)}
   <footer>
     <span>© hypercasting</span>
     <a href="../index-ko.html" data-ko="개인정보처리방침" data-en="Privacy policy">개인정보처리방침</a>
+    <span data-ko="이 페이지는 방문 통계를 위해 Google 애널리틱스를 사용합니다." data-en="This page uses Google Analytics for visit statistics.">이 페이지는 방문 통계를 위해 Google 애널리틱스를 사용합니다.</span>
   </footer>
 </div>
 <script>
@@ -86,6 +95,10 @@ footer a{color:var(--muted)}
     var r = "utm_source=" + src + "&utm_medium=" + (q.get("utm_medium") || "cpc") + (cmp ? "&utm_campaign=" + cmp : "");
     document.getElementById("play").href = "https://play.google.com/store/apps/details?id=com.hypercasting.highlowball&referrer=" + encodeURIComponent(r);
   }
+  // 스토어 버튼 클릭을 유입 출처와 함께 기록한다(현황판의 "스토어 클릭").
+  document.getElementById("play").addEventListener("click", function(){
+    if (typeof gtag === "function") gtag("event", "store_click", { source: src || "direct", campaign: cmp || "" });
+  });
 })();
 </script>
 </body>
