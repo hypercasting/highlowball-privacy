@@ -2,13 +2,16 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>하이볼: 선 그리기 물리 퍼즐 · High Ball</title>
-<meta name="description" content="선 하나 긋고, 공을 떨어뜨리고, 전 세계와 0.001초를 다툰다. 네온 물리 퍼즐 100판.">
-<meta property="og:title" content="하이볼: 선 그리기 물리 퍼즐">
-<meta property="og:description" content="선 하나 긋고, 공을 떨어뜨리고, 전 세계와 0.001초를 다툰다.">
-<meta property="og:image" content="https://hypercasting.github.io/highlowball-privacy/play/img/feature.png">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>하이볼: 선 하나로 골인! 네온 물리 퍼즐 · High Ball</title>
+<meta name="description" content="선 하나 긋고, 공을 떨어뜨리고, 전 세계와 0.001초를 다툰다. 바람·회오리·유리·벽돌 100판의 네온 물리 퍼즐. 구글 플레이 출시!">
+<meta property="og:title" content="하이볼: 선 하나로 골인!">
+<meta property="og:description" content="선 하나 긋고, 공을 떨어뜨리고, 전 세계와 0.001초를 다툰다. 구글 플레이 출시!">
+<meta property="og:image" content="https://hypercasting.github.io/highlowball-privacy/play/media/feature.jpg">
+<meta name="theme-color" content="#0b0820">
 <link rel="icon" href="img/icon.png">
+<link rel="preload" as="image" href="media/keyart.jpg">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css">
 <!-- Google tag (gtag.js): 방문 수와 스토어 버튼 클릭(store_click) 측정 -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-X80FP4KGVT"></script>
 <script>
@@ -18,86 +21,281 @@ gtag('js', new Date());
 gtag('config', 'G-X80FP4KGVT');
 </script>
 <style>
-:root{--bg:#0b0f1d;--panel:#141a2e;--ink:#eef2ff;--muted:#9aa6c8;--neon:#3ff0ff;--hot:#ff4fd8;--go:#3ddc84}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;line-height:1.6}
-.wrap{max-width:980px;margin:0 auto;padding:24px 16px 56px}
-header{display:flex;align-items:center;gap:14px}
-header img{width:64px;height:64px;border-radius:16px}
-h1{font-size:1.5rem;margin:0}
-.tag{color:var(--muted);margin:2px 0 0}
-.hero{margin:24px 0;border-radius:16px;overflow:hidden;border:1px solid #23305a}
-.hero img{display:block;width:100%}
-.cta{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:20px 0}
-.btn{display:inline-flex;align-items:center;gap:10px;background:var(--go);color:#062b16;font-weight:700;text-decoration:none;padding:14px 22px;border-radius:12px;font-size:1.05rem}
-.btn:focus-visible{outline:3px solid var(--neon);outline-offset:3px}
-.note{color:var(--muted);font-size:.9rem}
-.lead{font-size:1.15rem;margin:8px 0 24px}
-.shots{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:24px 0}
-.shots img{width:100%;border-radius:12px;border:1px solid #23305a}
-.feat{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
-.feat div{background:var(--panel);border-radius:12px;padding:16px}
-.feat b{color:var(--neon)}
-footer{margin-top:40px;color:var(--muted);font-size:.85rem;display:flex;gap:16px;flex-wrap:wrap}
-footer a{color:var(--muted)}
-[hidden]{display:none!important}
+:root { --bg:#0b0820; --ink:#f3f5ff; --muted:#a9b3d6; --mint:#3ff0c8; --cyan:#3fd8ff; --pink:#ff4fd8; --gold:#ffd166; --go:#3ddc84; }
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-weight: 700; word-break: keep-all; font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif; overflow-x: hidden; }
+a { color: inherit; }
+#fx { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+main { position: relative; z-index: 1; }
+
+/* ---------- 히어로 ---------- */
+.hero { position: relative; min-height: 100svh; display: grid; align-items: center; padding: 72px 20px 110px; overflow: hidden; }
+.hero::before { content: ""; position: absolute; inset: -4%; background: url("media/keyart.jpg") center/cover no-repeat; opacity: .55; animation: drift 22s ease-in-out infinite alternate; }
+.hero::after { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse at 30% 40%, rgba(11,8,32,0) 0, rgba(11,8,32,.55) 55%, var(--bg) 100%); }
+@media (max-width: 760px) { .hero::before { background-image: url("media/hero_v.jpg"); opacity: .5; } }
+@keyframes drift { from { transform: scale(1.04) translate(-1%, -1%); } to { transform: scale(1.12) translate(1.5%, 1%); } }
+.hero-in { position: relative; z-index: 2; max-width: 1100px; margin: 0 auto; width: 100%; display: grid; gap: 28px; grid-template-columns: 1.1fr .9fr; align-items: center; }
+@media (max-width: 860px) { .hero-in { grid-template-columns: 1fr; text-align: center; } }
+.brand { display: inline-flex; align-items: center; gap: 12px; }
+.brand img { width: 58px; height: 58px; border-radius: 15px; box-shadow: 0 0 26px rgba(63,240,255,.6); }
+.brand span { font-size: 1.05rem; color: var(--muted); letter-spacing: .04em; }
+h1 { margin: 18px 0 10px; font-size: clamp(2.6rem, 8vw, 5.4rem); line-height: 1.02; letter-spacing: -.04em; text-wrap: balance; }
+h1 .glow { background: linear-gradient(90deg, var(--gold), #ff9f43, var(--pink), var(--gold)); background-size: 300% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: shine 4s linear infinite; filter: drop-shadow(0 0 22px rgba(255,170,60,.55)); }
+@keyframes shine { to { background-position: 300% 0; } }
+.lead { font-weight: 500; font-size: clamp(1.05rem, 2.6vw, 1.35rem); color: #dfe6ff; margin: 0 0 26px; line-height: 1.55; }
+.lead b { color: var(--mint); }
+.cta-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+@media (max-width: 860px) { .cta-row { justify-content: center; } }
+.btn { position: relative; display: inline-flex; align-items: center; gap: 12px; padding: 18px 28px; border-radius: 18px; text-decoration: none; font-size: 1.2rem; color: #052414;
+       background: linear-gradient(135deg, #5cf5a0, var(--go) 55%, #1fbf6a); box-shadow: 0 0 0 0 rgba(61,220,132,.6), 0 12px 30px rgba(61,220,132,.35); animation: pulse 2.2s ease-in-out infinite; }
+.btn svg { width: 26px; height: 26px; }
+.btn:hover { transform: translateY(-2px) scale(1.02); }
+.btn:focus-visible { outline: 3px solid var(--cyan); outline-offset: 4px; }
+@keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(61,220,132,.55), 0 12px 30px rgba(61,220,132,.35); } 50% { box-shadow: 0 0 0 16px rgba(61,220,132,0), 0 12px 40px rgba(61,220,132,.55); } }
+.free { font-size: .95rem; color: var(--muted); }
+.badges { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+@media (max-width: 860px) { .badges { justify-content: center; } }
+.badge { padding: 7px 13px; border-radius: 999px; font-size: .9rem; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.14); backdrop-filter: blur(6px); }
+
+/* 휴대폰 속 실제 플레이 영상 */
+.phone { position: relative; justify-self: center; width: min(330px, 78vw); aspect-ratio: 9/19; border-radius: 42px; padding: 11px; background: #07060f;
+         box-shadow: 0 0 0 2px rgba(160,190,255,.35), 0 0 70px rgba(63,240,255,.45), 0 0 140px rgba(255,79,216,.25), 0 40px 90px rgba(0,0,0,.7); transform: rotate(4deg); animation: float 6s ease-in-out infinite; }
+@keyframes float { 0%,100% { transform: rotate(4deg) translateY(0); } 50% { transform: rotate(2deg) translateY(-14px); } }
+.phone video { width: 100%; height: 100%; object-fit: cover; border-radius: 32px; display: block; background: #110d2a; }
+.sound { position: absolute; right: -8px; bottom: 26px; z-index: 3; border: 0; border-radius: 999px; padding: 10px 14px; font: inherit; font-size: .9rem; color: #fff; cursor: pointer;
+         background: rgba(255,79,216,.85); box-shadow: 0 0 20px rgba(255,79,216,.6); }
+.sound:focus-visible { outline: 3px solid var(--cyan); outline-offset: 3px; }
+.scroll-hint { position: absolute; left: 50%; bottom: 22px; z-index: 2; transform: translateX(-50%); color: var(--muted); font-size: .85rem; animation: bob 1.6s ease-in-out infinite; }
+@keyframes bob { 50% { transform: translate(-50%, 6px); } }
+
+/* ---------- 흐르는 띠 ---------- */
+.ticker { overflow: hidden; border-block: 1px solid rgba(255,255,255,.1); background: linear-gradient(90deg, rgba(63,240,200,.12), rgba(255,79,216,.12)); }
+.ticker div { display: flex; gap: 36px; width: max-content; padding: 14px 0; animation: tick 28s linear infinite; font-size: 1.05rem; white-space: nowrap; }
+.ticker span::before { content: "●"; color: var(--gold); margin-right: 12px; font-size: .7em; vertical-align: middle; }
+@keyframes tick { to { transform: translateX(-50%); } }
+
+section { max-width: 1100px; margin: 0 auto; padding: 72px 20px; }
+h2 { font-size: clamp(1.8rem, 5vw, 2.8rem); margin: 0 0 8px; letter-spacing: -.03em; text-wrap: balance; }
+h2 em { font-style: normal; color: var(--mint); text-shadow: 0 0 18px rgba(63,240,200,.6); }
+.sub { color: var(--muted); margin: 0 0 28px; font-size: 1.05rem; }
+
+/* ---------- 영상 릴 ---------- */
+.reel { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(200px, 240px); gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 6px 4px 18px; scrollbar-width: thin; }
+.clip { scroll-snap-align: center; position: relative; border-radius: 22px; overflow: hidden; aspect-ratio: 9/16; background: #110d2a; box-shadow: 0 0 0 1px rgba(255,255,255,.12), 0 14px 34px rgba(0,0,0,.5); transition: transform .3s; }
+.clip:hover { transform: translateY(-6px) rotate(-1deg); box-shadow: 0 0 0 2px var(--pink), 0 0 40px rgba(255,79,216,.45); }
+.clip video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.clip b { position: absolute; left: 0; right: 0; bottom: 0; padding: 30px 14px 14px; font-size: 1rem; background: linear-gradient(transparent, rgba(5,3,20,.92)); }
+
+/* ---------- 특징 ---------- */
+.feat { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
+.card { position: relative; padding: 24px 22px; border-radius: 22px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); overflow: hidden; }
+.card::before { content: ""; position: absolute; width: 160px; height: 160px; right: -50px; top: -50px; border-radius: 50%; background: var(--c, var(--mint)); filter: blur(60px); opacity: .35; }
+.card .ico { font-size: 2rem; }
+.card h3 { margin: 10px 0 6px; font-size: 1.3rem; }
+.card p { margin: 0; color: #cfd7f5; line-height: 1.55; font-weight: 400; }
+
+/* ---------- 경쟁 배너 ---------- */
+.race { position: relative; border-radius: 28px; overflow: hidden; min-height: 340px; display: grid; align-items: end; padding: 32px; background: url("media/race.jpg") center/cover; box-shadow: 0 30px 80px rgba(0,0,0,.5); }
+.race::after { content: ""; position: absolute; inset: 0; background: linear-gradient(0deg, rgba(11,8,32,.95), rgba(11,8,32,.1) 70%); }
+.race div { position: relative; z-index: 1; }
+.race .big { font-size: clamp(2.6rem, 9vw, 5rem); line-height: 1; color: var(--gold); text-shadow: 0 0 30px rgba(255,190,60,.7); font-variant-numeric: tabular-nums; }
+
+/* ---------- 스크린샷 ---------- */
+.shots { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(180px, 220px); gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 14px; }
+.shots img { width: 100%; border-radius: 18px; scroll-snap-align: start; box-shadow: 0 10px 30px rgba(0,0,0,.5); }
+
+/* ---------- 마지막 CTA ---------- */
+.final { text-align: center; padding-bottom: 140px; }
+.final img { width: 96px; height: 96px; border-radius: 24px; box-shadow: 0 0 40px rgba(63,240,255,.6); animation: spin 8s linear infinite; }
+@keyframes spin { 50% { transform: rotate(8deg) scale(1.06); } }
+footer { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 24px 20px 120px; color: var(--muted); font-size: .85rem; display: flex; gap: 16px; flex-wrap: wrap; font-family: system-ui, sans-serif; }
+
+/* 휴대폰 아래 고정 버튼 */
+.sticky { position: fixed; left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); z-index: 5; display: none; }
+.sticky .btn { width: 100%; justify-content: center; font-size: 1.1rem; padding: 16px; }
+@media (max-width: 760px) { .sticky.on { display: block; } }
+
+.reveal { opacity: 0; transform: translateY(26px); transition: opacity .7s ease, transform .7s ease; }
+.reveal.in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } .reveal { opacity: 1; transform: none; } }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <img src="img/icon.png" alt="">
-    <div>
-      <h1 data-ko="하이볼: 선 그리기 물리 퍼즐" data-en="High Ball: Draw Physics Puzzle">하이볼: 선 그리기 물리 퍼즐</h1>
-      <p class="tag" data-ko="hypercasting · 퍼즐 게임 · 무료" data-en="hypercasting · Puzzle · Free">hypercasting · 퍼즐 게임 · 무료</p>
+<canvas id="fx" aria-hidden="true"></canvas>
+<main>
+  <header class="hero">
+    <div class="hero-in">
+      <div>
+        <div class="brand"><img src="img/icon.png" alt=""><span>HIGH BALL · 네온 물리 퍼즐</span></div>
+        <h1>선 하나로<br><span class="glow">골인!</span></h1>
+        <p class="lead">선을 긋고 공을 떨어뜨리면 끝. <b>바람·회오리·유리·벽돌</b>을 뚫고 전 세계와 <b>0.001초</b>를 다투는 100판의 퍼즐.</p>
+        <div class="cta-row">
+          <a class="btn play" href="https://play.google.com/store/apps/details?id=com.hypercasting.highlowball&referrer=utm_source%3Dlanding%26utm_medium%3Dweb">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3.6 2.3 13.4 12l-9.8 9.7c-.3-.2-.6-.6-.6-1.1V3.4c0-.5.3-.9.6-1.1Zm11 8.5 2.6-2.6 3.3 1.9c.9.5.9 1.8 0 2.3l-3.3 1.9-2.6-2.6L14.3 12Zm-1.2 1.2 2.4 2.4L5 20.6l8.4-8.6ZM5 3.4l10.8 6.2-2.4 2.4L5 3.4Z"/></svg>
+            Google Play에서 무료로 받기
+          </a>
+          <span class="free">안드로이드 · 구글 플레이 출시!</span>
+        </div>
+        <div class="badges"><span class="badge">🎯 100 스테이지</span><span class="badge">🏆 판마다 세계 순위</span><span class="badge">⚡ 10명 실시간 대결</span><span class="badge">✅ 완전 무료</span></div>
+      </div>
+      <div class="phone">
+        <video id="heroVid" src="media/v_bounce.mp4" poster="media/v_bounce.jpg" autoplay muted loop playsinline preload="auto"></video>
+        <button class="sound" id="soundBtn" type="button" aria-pressed="false">🔊 소리 켜기</button>
+      </div>
     </div>
+    <div class="scroll-hint">아래로 ↓ 실제 플레이 영상</div>
   </header>
 
-  <div class="hero"><img src="img/feature.png" alt="High Ball"></div>
+  <div class="ticker" aria-hidden="true"><div>
+    <span>선 하나로 골인</span><span>바람개비</span><span>회오리</span><span>깨지는 유리</span><span>무너지는 벽돌 탑</span><span>워프</span><span>공 두 개 동시 골인</span><span>0.001초 기록 경쟁</span><span>10명 실시간 대결</span>
+    <span>선 하나로 골인</span><span>바람개비</span><span>회오리</span><span>깨지는 유리</span><span>무너지는 벽돌 탑</span><span>워프</span><span>공 두 개 동시 골인</span><span>0.001초 기록 경쟁</span><span>10명 실시간 대결</span>
+  </div></div>
 
-  <p class="lead" data-ko="선 하나 긋고, 공을 떨어뜨리고, 전 세계와 0.001초를 다툰다. 네온 물리 퍼즐 100판." data-en="Draw one line. Drop the ball. Race the world across 100 neon physics puzzles.">선 하나 긋고, 공을 떨어뜨리고, 전 세계와 0.001초를 다툰다. 네온 물리 퍼즐 100판.</p>
+  <section class="reveal">
+    <h2>보는 순간 <em>해보고 싶어지는</em> 한 판</h2>
+    <p class="sub">전부 실제 게임 화면입니다. 옆으로 넘겨 보세요 →</p>
+    <div class="reel" id="reel">
+      <div class="clip"><video data-src="media/v_glass.mp4" poster="media/v_glass.jpg" muted loop playsinline preload="none"></video><b>💥 유리는 깨라고 있는 것</b></div>
+      <div class="clip"><video data-src="media/v_tower.mp4" poster="media/v_tower.jpg" muted loop playsinline preload="none"></video><b>🧱 탑을 무너뜨려 길을 연다</b></div>
+      <div class="clip"><video data-src="media/v_vortex.mp4" poster="media/v_vortex.jpg" muted loop playsinline preload="none"></video><b>🌀 회오리를 타고 골인</b></div>
+      <div class="clip"><video data-src="media/v_twoballs.mp4" poster="media/v_twoballs.jpg" muted loop playsinline preload="none"></video><b>⚽⚽ 두 개 다 넣어야 클리어</b></div>
+      <div class="clip"><video data-src="media/v_warp.mp4" poster="media/v_warp.jpg" muted loop playsinline preload="none"></video><b>✨ 워프, 어디로 나올까?</b></div>
+    </div>
+  </section>
 
-  <div class="cta">
-    <a class="btn" id="play" href="https://play.google.com/store/apps/details?id=com.hypercasting.highlowball&referrer=utm_source%3Dlanding%26utm_medium%3Dweb" data-ko="Google Play에서 받기" data-en="Get it on Google Play">Google Play에서 받기</a>
-    <span class="note" data-ko="안드로이드 · 구글 플레이 출시! 무료" data-en="Android · Out now on Google Play · Free">안드로이드 · 구글 플레이 출시! 무료</span>
-  </div>
+  <section class="reveal">
+    <h2>쉽게 시작, <em>끝없이</em> 파고든다</h2>
+    <p class="sub">규칙은 하나. 공이 골에 들어가게 선을 그어라.</p>
+    <div class="feat">
+      <div class="card" style="--c:var(--mint)"><div class="ico">✍️</div><h3>나만의 길을 그린다</h3><p>직선, 원, 자유 곡선. 잉크는 한정되어 있어 한 획 한 획이 승부.</p></div>
+      <div class="card" style="--c:var(--pink)"><div class="ico">🌪️</div><h3>살아 움직이는 판</h3><p>바람개비, 회오리, 가속 패드, 깨지는 유리와 무너지는 벽돌까지.</p></div>
+      <div class="card" style="--c:var(--gold)"><div class="ico">⚖️</div><h3>공정한 물리</h3><p>같은 선이면 언제나 같은 결과. 기록을 깼다면 진짜로 깬 것.</p></div>
+      <div class="card" style="--c:var(--cyan)"><div class="ico">⚡</div><h3>10명 실시간 대결</h3><p>같은 판, 같은 시간. 누가 더 빨리 넣는지 바로 가려진다.</p></div>
+    </div>
+  </section>
 
-  <div class="shots" id="shots"></div>
+  <section class="reveal">
+    <div class="race"><div>
+      <div class="big" id="clock">0.001</div>
+      <h2 style="margin-top:10px">초 차이로 <em>순위가 바뀐다</em></h2>
+      <p class="sub" style="margin:0">모든 스테이지에 세계 순위표. 내 기록이 오늘 몇 등인지 확인해 보세요.</p>
+    </div></div>
+  </section>
 
-  <div class="feat">
-    <div data-ko="<b>나만의 길을 그린다</b><br>직선, 원, 자유 곡선. 잉크는 한정되어 있어 한 획 한 획이 중요합니다." data-en="<b>Draw your own path</b><br>Lines, circles and freehand curves. Ink is limited — every stroke counts."></div>
-    <div data-ko="<b>100 스테이지</b><br>움직이는 발판, 바람, 회오리, 깨지는 유리, 공 두 개 동시 골인까지." data-en="<b>100 stages</b><br>Moving platforms, wind, vortexes, breaking glass, even two balls at once."></div>
-    <div data-ko="<b>공정한 물리</b><br>같은 선이면 언제나 같은 결과. 기록을 깼다면 진짜로 깬 것입니다." data-en="<b>Fair physics</b><br>Same line, same result, every time. A beaten record is really beaten."></div>
-    <div data-ko="<b>전 세계 순위</b><br>모든 스테이지에 세계 순위표. 10명이 함께 달리는 실시간 대결도." data-en="<b>Global leaderboards</b><br>Every stage is ranked worldwide, plus live 10-player races."></div>
-  </div>
+  <section class="reveal">
+    <h2>게임 <em>미리보기</em></h2>
+    <div class="shots">
+      <img src="media/shot_01.jpg" alt="선 하나로 골인시켜라" loading="lazy">
+      <img src="media/shot_02.jpg" alt="바람·회오리·유리 다 뚫고 간다" loading="lazy">
+      <img src="media/shot_03.jpg" alt="0.001초를 다툰다" loading="lazy">
+      <img src="media/shot_04.jpg" alt="머리 쓰는 물리 퍼즐" loading="lazy">
+      <img src="media/shot_05.jpg" alt="갈수록 더 어렵게" loading="lazy">
+      <img src="media/shot_06.jpg" alt="지금 무료로 시작하기" loading="lazy">
+    </div>
+  </section>
 
-  <footer>
-    <span>© hypercasting</span>
-    <a href="../index-ko.html" data-ko="개인정보처리방침" data-en="Privacy policy">개인정보처리방침</a>
-    <span data-ko="이 페이지는 방문 통계를 위해 Google 애널리틱스를 사용합니다." data-en="This page uses Google Analytics for visit statistics.">이 페이지는 방문 통계를 위해 Google 애널리틱스를 사용합니다.</span>
-  </footer>
-</div>
+  <section class="final reveal">
+    <img src="img/icon.png" alt="">
+    <h2 style="margin-top:18px">지금 <em>첫 판</em> 해보기</h2>
+    <p class="sub">설치 1분, 첫 골인까지 10초.</p>
+    <a class="btn play" href="https://play.google.com/store/apps/details?id=com.hypercasting.highlowball&referrer=utm_source%3Dlanding%26utm_medium%3Dweb">Google Play에서 무료로 받기</a>
+  </section>
+</main>
+
+<div class="sticky" id="sticky"><a class="btn play" href="https://play.google.com/store/apps/details?id=com.hypercasting.highlowball&referrer=utm_source%3Dlanding%26utm_medium%3Dweb">▶ 무료로 받기</a></div>
+
+<footer>
+  <span>© hypercasting</span>
+  <a href="../index-ko.html">개인정보처리방침</a>
+  <span>이 페이지는 방문 통계를 위해 Google 애널리틱스를 사용합니다.</span>
+  <button id="bgmBtn" type="button" style="font:inherit;color:inherit;background:none;border:1px solid rgba(255,255,255,.2);border-radius:999px;padding:3px 12px;cursor:pointer" aria-pressed="false">🎵 배경음 켜기</button>
+</footer>
+
 <script>
-(function(){
-  var ko = /^ko\b/i.test(navigator.language || "");
-  document.documentElement.lang = ko ? "ko" : "en";
-  document.querySelectorAll("[data-ko]").forEach(function(el){
-    var v = el.getAttribute(ko ? "data-ko" : "data-en");
-    if (el.tagName === "DIV") el.innerHTML = v; else el.textContent = v;
-  });
-  var p = ko ? "ko" : "en", box = document.getElementById("shots");
-  ["01","02","03","04","05"].forEach(function(n){
-    var i = document.createElement("img"); i.loading = "lazy"; i.alt = ""; i.src = "img/" + p + n + ".png"; box.appendChild(i);
-  });
-  // 광고 유입 구분: utm_* 를 스토어 링크의 referrer 로 넘긴다.
+(function () {
+  "use strict";
+  // ---- 유입 출처를 스토어 링크와 측정에 넘긴다 ----
   var q = new URLSearchParams(location.search), src = q.get("utm_source"), cmp = q.get("utm_campaign");
+  var links = document.querySelectorAll("a.play");
   if (src) {
     var r = "utm_source=" + src + "&utm_medium=" + (q.get("utm_medium") || "cpc") + (cmp ? "&utm_campaign=" + cmp : "");
-    document.getElementById("play").href = "https://play.google.com/store/apps/details?id=com.hypercasting.highlowball&referrer=" + encodeURIComponent(r);
+    links.forEach(function (a) { a.href = "https://play.google.com/store/apps/details?id=com.hypercasting.highlowball&referrer=" + encodeURIComponent(r); });
   }
-  // 스토어 버튼 클릭을 유입 출처와 함께 기록한다(현황판의 "스토어 클릭").
-  document.getElementById("play").addEventListener("click", function(){
-    if (typeof gtag === "function") gtag("event", "store_click", { source: src || "direct", campaign: cmp || "" });
+  links.forEach(function (a, i) {
+    a.addEventListener("click", function () { if (typeof gtag === "function") gtag("event", "store_click", { source: src || "direct", campaign: cmp || "", button: ["hero", "final", "sticky"][i] || "other" }); });
+  });
+
+  // ---- 히어로 영상 소리 ----
+  var hv = document.getElementById("heroVid"), sb = document.getElementById("soundBtn");
+  sb.addEventListener("click", function () {
+    hv.muted = !hv.muted; if (!hv.muted) hv.play().catch(function () {});
+    sb.textContent = hv.muted ? "🔊 소리 켜기" : "🔇 소리 끄기"; sb.setAttribute("aria-pressed", String(!hv.muted));
+    if (typeof gtag === "function" && !hv.muted) gtag("event", "sound_on");
+  });
+
+  // ---- 화면에 들어온 영상만 재생, 섹션 등장 효과 ----
+  var io = new IntersectionObserver(function (es) {
+    es.forEach(function (e) {
+      var v = e.target;
+      if (v.tagName === "VIDEO") {
+        if (e.isIntersecting) { if (!v.src && v.dataset.src) v.src = v.dataset.src; v.play().catch(function () {}); } else v.pause();
+      } else if (e.isIntersecting) v.classList.add("in");
+    });
+  }, { threshold: 0.35 });
+  document.querySelectorAll("#reel video").forEach(function (v) { io.observe(v); });
+  document.querySelectorAll(".reveal").forEach(function (s) { io.observe(s); });
+
+  // ---- 아래 고정 버튼: 히어로를 지나면 보인다 ----
+  var sticky = document.getElementById("sticky"), hero = document.querySelector(".hero");
+  new IntersectionObserver(function (es) { sticky.classList.toggle("on", !es[0].isIntersecting); }).observe(hero);
+
+  // ---- 기록 숫자 굴리기 ----
+  var clock = document.getElementById("clock"), t0 = 0;
+  new IntersectionObserver(function (es) {
+    if (!es[0].isIntersecting || t0) return; t0 = performance.now();
+    (function tick(now) { var p = Math.min(1, (now - t0) / 1600), v = 2.5 * Math.pow(1 - p, 3) + 0.001 * p; clock.textContent = v.toFixed(3); if (p < 1) requestAnimationFrame(tick); })(t0);
+  }).observe(clock);
+
+  // ---- 배경 효과: 떨어지는 빛나는 공과 네온 선 ----
+  var cv = document.getElementById("fx"), cx = cv.getContext("2d"), W, H, balls = [], lines = [], reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function size() { W = cv.width = innerWidth * devicePixelRatio; H = cv.height = innerHeight * devicePixelRatio; lines = []; for (var i = 0; i < 4; i++) { var y = H * (0.3 + i * 0.18), x = Math.random() * W * 0.6; lines.push([x, y, x + W * (0.25 + Math.random() * 0.2), y + (Math.random() - 0.5) * H * 0.12]); } }
+  size(); addEventListener("resize", size);
+  function spawn() { balls.push({ x: Math.random() * W, y: -20, vx: (Math.random() - 0.5) * 2, vy: 0, r: (4 + Math.random() * 5) * devicePixelRatio, trail: [] }); }
+  var last = 0;
+  function step(now) {
+    requestAnimationFrame(step);
+    if (reduce || document.hidden) return;
+    if (now - last > 650 && balls.length < 14) { spawn(); last = now; }
+    cx.clearRect(0, 0, W, H);
+    cx.lineCap = "round";
+    lines.forEach(function (l) { cx.strokeStyle = "rgba(63,240,200,.18)"; cx.lineWidth = 3 * devicePixelRatio; cx.shadowColor = "#3ff0c8"; cx.shadowBlur = 18; cx.beginPath(); cx.moveTo(l[0], l[1]); cx.lineTo(l[2], l[3]); cx.stroke(); });
+    balls.forEach(function (b) {
+      b.vy += 0.18 * devicePixelRatio; b.x += b.vx; b.y += b.vy;
+      lines.forEach(function (l) {
+        var dx = l[2] - l[0], dy = l[3] - l[1], t = ((b.x - l[0]) * dx + (b.y - l[1]) * dy) / (dx * dx + dy * dy);
+        if (t < 0 || t > 1) return;
+        var px = l[0] + t * dx, py = l[1] + t * dy, d = Math.hypot(b.x - px, b.y - py);
+        if (d < b.r && b.vy > 0) { var len = Math.hypot(dx, dy), nx = -dy / len, ny = dx / len; if (ny > 0) { nx = -nx; ny = -ny; } var dot = b.vx * nx + b.vy * ny; b.vx -= 1.7 * dot * nx; b.vy -= 1.7 * dot * ny; b.y = py - b.r; }
+      });
+      b.trail.push([b.x, b.y]); if (b.trail.length > 12) b.trail.shift();
+      for (var i = 0; i < b.trail.length; i++) { cx.fillStyle = "rgba(255,190,60," + (i / b.trail.length * 0.25) + ")"; cx.beginPath(); cx.arc(b.trail[i][0], b.trail[i][1], b.r * i / b.trail.length, 0, 7); cx.fill(); }
+      cx.shadowColor = "#ffb020"; cx.shadowBlur = 24; cx.fillStyle = "#ffcf4d"; cx.beginPath(); cx.arc(b.x, b.y, b.r, 0, 7); cx.fill();
+    });
+    cx.shadowBlur = 0;
+    balls = balls.filter(function (b) { return b.y < H + 40 && b.x > -40 && b.x < W + 40; });
+  }
+  requestAnimationFrame(step);
+
+  // ---- 배경음: 브라우저에서 직접 만드는 짧은 신스 반복(저작권 없음), 누를 때만 켜진다 ----
+  var bgm = document.getElementById("bgmBtn"), ac = null, timer = null;
+  var notes = [523.25, 659.25, 783.99, 1046.5, 783.99, 659.25, 587.33, 739.99];
+  function blip(f, t, d, type, vol) { var o = ac.createOscillator(), g = ac.createGain(); o.type = type; o.frequency.value = f; g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + d); o.connect(g).connect(ac.destination); o.start(t); o.stop(t + d + 0.05); }
+  function loop() { var t = ac.currentTime + 0.05; for (var i = 0; i < 8; i++) { blip(notes[i], t + i * 0.18, 0.16, "triangle", 0.05); if (i % 2 === 0) blip(notes[i] / 4, t + i * 0.18, 0.3, "sine", 0.06); } }
+  bgm.addEventListener("click", function () {
+    if (timer) { clearInterval(timer); timer = null; bgm.textContent = "🎵 배경음 켜기"; bgm.setAttribute("aria-pressed", "false"); return; }
+    ac = ac || new (window.AudioContext || window.webkitAudioContext)(); ac.resume(); loop(); timer = setInterval(loop, 1440);
+    bgm.textContent = "🎵 배경음 끄기"; bgm.setAttribute("aria-pressed", "true");
   });
 })();
 </script>
