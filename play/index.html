@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>하이볼: 선 그리기 물리 퍼즐 · High Ball</title>
+<meta name="description" content="선 하나 긋고, 공을 떨어뜨리고, 전 세계와 0.001초를 다툰다. 네온 물리 퍼즐 100판.">
+<meta property="og:title" content="하이볼: 선 그리기 물리 퍼즐">
+<meta property="og:description" content="선 하나 긋고, 공을 떨어뜨리고, 전 세계와 0.001초를 다툰다.">
+<meta property="og:image" content="https://hypercasting.github.io/highlowball-privacy/play/img/feature.png">
+<link rel="icon" href="img/icon.png">
+<style>
+:root{--bg:#0b0f1d;--panel:#141a2e;--ink:#eef2ff;--muted:#9aa6c8;--neon:#3ff0ff;--hot:#ff4fd8;--go:#3ddc84}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;line-height:1.6}
+.wrap{max-width:980px;margin:0 auto;padding:24px 16px 56px}
+header{display:flex;align-items:center;gap:14px}
+header img{width:64px;height:64px;border-radius:16px}
+h1{font-size:1.5rem;margin:0}
+.tag{color:var(--muted);margin:2px 0 0}
+.hero{margin:24px 0;border-radius:16px;overflow:hidden;border:1px solid #23305a}
+.hero img{display:block;width:100%}
+.cta{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:20px 0}
+.btn{display:inline-flex;align-items:center;gap:10px;background:var(--go);color:#062b16;font-weight:700;text-decoration:none;padding:14px 22px;border-radius:12px;font-size:1.05rem}
+.btn:focus-visible{outline:3px solid var(--neon);outline-offset:3px}
+.note{color:var(--muted);font-size:.9rem}
+.lead{font-size:1.15rem;margin:8px 0 24px}
+.shots{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:24px 0}
+.shots img{width:100%;border-radius:12px;border:1px solid #23305a}
+.feat{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.feat div{background:var(--panel);border-radius:12px;padding:16px}
+.feat b{color:var(--neon)}
+footer{margin-top:40px;color:var(--muted);font-size:.85rem;display:flex;gap:16px;flex-wrap:wrap}
+footer a{color:var(--muted)}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <img src="img/icon.png" alt="">
+    <div>
+      <h1 data-ko="하이볼: 선 그리기 물리 퍼즐" data-en="High Ball: Draw Physics Puzzle">하이볼: 선 그리기 물리 퍼즐</h1>
+      <p class="tag" data-ko="hypercasting · 퍼즐 게임 · 무료" data-en="hypercasting · Puzzle · Free">hypercasting · 퍼즐 게임 · 무료</p>
+    </div>
+  </header>
+
+  <div class="hero"><img src="img/feature.png" alt="High Ball"></div>
+
+  <p class="lead" data-ko="선 하나 긋고, 공을 떨어뜨리고, 전 세계와 0.001초를 다툰다. 네온 물리 퍼즐 100판." data-en="Draw one line. Drop the ball. Race the world across 100 neon physics puzzles.">선 하나 긋고, 공을 떨어뜨리고, 전 세계와 0.001초를 다툰다. 네온 물리 퍼즐 100판.</p>
+
+  <div class="cta">
+    <a class="btn" id="play" href="https://play.google.com/store/apps/details?id=com.hypercasting.highlowball&referrer=utm_source%3Dlanding%26utm_medium%3Dweb" data-ko="Google Play에서 받기" data-en="Get it on Google Play">Google Play에서 받기</a>
+    <span class="note" data-ko="안드로이드 · 곧 정식 출시 (스토어 페이지가 아직 안 열리면 며칠 뒤 다시 와 주세요)" data-en="Android · launching soon (if the store page isn't open yet, check back in a few days)">안드로이드 · 곧 정식 출시 (스토어 페이지가 아직 안 열리면 며칠 뒤 다시 와 주세요)</span>
+  </div>
+
+  <div class="shots" id="shots"></div>
+
+  <div class="feat">
+    <div data-ko="<b>나만의 길을 그린다</b><br>직선, 원, 자유 곡선. 잉크는 한정되어 있어 한 획 한 획이 중요합니다." data-en="<b>Draw your own path</b><br>Lines, circles and freehand curves. Ink is limited — every stroke counts."></div>
+    <div data-ko="<b>100 스테이지</b><br>움직이는 발판, 바람, 회오리, 깨지는 유리, 공 두 개 동시 골인까지." data-en="<b>100 stages</b><br>Moving platforms, wind, vortexes, breaking glass, even two balls at once."></div>
+    <div data-ko="<b>공정한 물리</b><br>같은 선이면 언제나 같은 결과. 기록을 깼다면 진짜로 깬 것입니다." data-en="<b>Fair physics</b><br>Same line, same result, every time. A beaten record is really beaten."></div>
+    <div data-ko="<b>전 세계 순위</b><br>모든 스테이지에 세계 순위표. 10명이 함께 달리는 실시간 대결도." data-en="<b>Global leaderboards</b><br>Every stage is ranked worldwide, plus live 10-player races."></div>
+  </div>
+
+  <footer>
+    <span>© hypercasting</span>
+    <a href="../index-ko.html" data-ko="개인정보처리방침" data-en="Privacy policy">개인정보처리방침</a>
+  </footer>
+</div>
+<script>
+(function(){
+  var ko = /^ko\b/i.test(navigator.language || "");
+  document.documentElement.lang = ko ? "ko" : "en";
+  document.querySelectorAll("[data-ko]").forEach(function(el){
+    var v = el.getAttribute(ko ? "data-ko" : "data-en");
+    if (el.tagName === "DIV") el.innerHTML = v; else el.textContent = v;
+  });
+  var p = ko ? "ko" : "en", box = document.getElementById("shots");
+  ["01","02","03","04","05"].forEach(function(n){
+    var i = document.createElement("img"); i.loading = "lazy"; i.alt = ""; i.src = "img/" + p + n + ".png"; box.appendChild(i);
+  });
+  // 광고 유입 구분: utm_* 를 스토어 링크의 referrer 로 넘긴다.
+  var q = new URLSearchParams(location.search), src = q.get("utm_source"), cmp = q.get("utm_campaign");
+  if (src) {
+    var r = "utm_source=" + src + "&utm_medium=" + (q.get("utm_medium") || "cpc") + (cmp ? "&utm_campaign=" + cmp : "");
+    document.getElementById("play").href = "https://play.google.com/store/apps/details?id=com.hypercasting.highlowball&referrer=" + encodeURIComponent(r);
+  }
+})();
+</script>
+</body>
+</html>
