@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>High Ball 성장 현황판</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* 자동 프로그램(Tools/growth/agent)이 data 를 채워 넣는 현황판. 위에서 아래로 목표 → 깔때기 → 추이 → 게시물 → 준비 상태 → 채널·결정 → 원장 */
+:root {
+  --bg: #f3f5f8; --panel: #ffffff; --ink: #141a26; --muted: #5d6679; --line: #dde2ea; --accent: #2743d6;
+  --good: #13824f; --warn: #b76a00; --bad: #c2372e; --good-bg: #e3f3ea; --warn-bg: #fdf0da; --bad-bg: #fbe5e3; --bar: #c9d2f5;
+  --yt: #d93a2b; --tt: #12a7b5; --ig: #b8389b;
+  --font-body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --font-num: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #0f131b; --panel: #171d29; --ink: #e8ecf4; --muted: #9aa4b8; --line: #2a3242; --accent: #7d93ff;
+    --good: #4cc98a; --warn: #f0a640; --bad: #ff7b70; --good-bg: #173327; --warn-bg: #3a2c12; --bad-bg: #3d1c1a; --bar: #34427a;
+    --yt: #ff7466; --tt: #4fd6e2; --ig: #ec74cf; color-scheme: dark; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.55; }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 20px 16px 48px; display: grid; gap: 16px; }
+header { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 16px; }
+h1 { font-size: 1.45rem; margin: 0; } h2 { font-size: 1rem; margin: 0; }
+.sub { color: var(--muted); font-size: 0.85rem; }
+.num { font-family: var(--font-num); font-variant-numeric: tabular-nums; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: grid; gap: 12px; align-content: start; min-width: 0; }
+.panel-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 12px; }
+.grid2 { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+.goal-top { display: flex; flex-wrap: wrap; gap: 8px 24px; align-items: flex-end; }
+.goal-big { font-size: 2rem; font-weight: 600; line-height: 1.1; } .goal-of { color: var(--muted); }
+.meter { height: 12px; background: var(--line); border-radius: 6px; overflow: hidden; } .meter > span { display: block; height: 100%; background: var(--accent); }
+.kpis { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+.kpi { display: grid; gap: 2px; } .kpi .label { font-size: 0.78rem; color: var(--muted); } .kpi .value { font-size: 1.2rem; font-weight: 600; }
+.funnel { display: grid; gap: 6px; }
+.fstep { display: grid; grid-template-columns: minmax(96px, 150px) 1fr minmax(64px, auto); gap: 10px; align-items: center; }
+.fstep .name { font-size: 0.88rem; } .fstep .name small { display: block; color: var(--muted); font-size: 0.72rem; line-height: 1.3; }
+.ftrack { height: 26px; background: var(--line); border-radius: 6px; overflow: hidden; position: relative; min-width: 0; }
+.ftrack > span { display: block; height: 100%; background: var(--accent); }
+.ftrack > b { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-family: var(--font-num); font-weight: 600; font-size: 0.85rem; color: var(--ink); }
+.ftrack.unknown { background: repeating-linear-gradient(45deg, var(--line) 0 6px, transparent 6px 12px); }
+.fstep .rate { text-align: right; font-size: 0.8rem; color: var(--muted); } .fstep .rate.low { color: var(--bad); font-weight: 600; }
+.insight { font-size: 0.88rem; padding: 10px 12px; border-radius: 8px; background: var(--warn-bg); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; font-size: 0.82rem; border: 1px solid var(--line); }
+.chip::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+.chip.ok { background: var(--good-bg); border-color: transparent; } .chip.ok::before { background: var(--good); }
+.chip.wait { background: var(--warn-bg); border-color: transparent; } .chip.wait::before { background: var(--warn); }
+.chip.no { background: var(--bad-bg); border-color: transparent; } .chip.no::before { background: var(--bad); }
+.chip.yt::before { background: var(--yt); } .chip.tt::before { background: var(--tt); } .chip.ig::before { background: var(--ig); }
+.spark-grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.spark { display: grid; gap: 4px; min-width: 0; } .spark .row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.spark svg { width: 100%; height: 64px; display: block; } .spark .axis { display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--muted); }
+.spark .none { font-size: 0.78rem; color: var(--muted); }
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th { font-weight: 500; color: var(--muted); font-size: 0.78rem; } td.r, th.r { text-align: right; }
+.tag { font-size: 0.75rem; padding: 1px 8px; border-radius: 999px; background: var(--line); }
+.tag.ok { background: var(--good-bg); color: var(--good); } .tag.wait { background: var(--warn-bg); color: var(--warn); } .tag.no { background: var(--bad-bg); color: var(--bad); }
+.pf { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+.pf.youtube { background: var(--yt); } .pf.tiktok { background: var(--tt); } .pf.instagram { background: var(--ig); }
+.vbar { display: inline-block; height: 6px; border-radius: 3px; background: var(--bar); vertical-align: middle; margin-left: 6px; }
+.empty { color: var(--muted); font-size: 0.88rem; padding: 8px 0; }
+ul.list { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; }
+a { color: var(--accent); }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.seg button { font: inherit; font-size: 0.8rem; border: 0; background: transparent; color: var(--muted); padding: 4px 10px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: #fff; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header><h1>High Ball 성장 현황판</h1><span class="sub" id="updated"></span></header>
+
+  <section class="panel">
+    <div class="panel-head"><h2>오늘</h2><span class="sub" id="today-since"></span></div>
+    <div class="kpis" id="today-kpis"></div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head"><h2>영상별 성과 — 자동으로 만든 영상이 매체마다 몇 번 보였나</h2><span class="sub">최신 수집값 · 빈 칸은 아직 못 읽음 · ✕는 게시 실패</span></div>
+    <div class="chips" id="style-avg"></div>
+    <div class="table-wrap"><table><thead><tr id="vp-head"></tr></thead><tbody id="vp-body"></tbody></table></div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head"><h2>이번 달 수익 목표</h2><span class="sub" id="goal-period"></span></div>
+    <div class="goal-top"><div><span class="goal-big num" id="goal-rev">0원</span> <span class="goal-of" id="goal-target"></span></div><span class="sub" id="goal-pace"></span></div>
+    <div class="meter" id="goal-meter"><span></span></div>
+    <div class="kpis">
+      <div class="kpi"><span class="label">이번 달 광고비</span><span class="value num" id="k-spend">0원</span></div>
+      <div class="kpi"><span class="label">광고비 한도 남음</span><span class="value num" id="k-left"></span></div>
+      <div class="kpi"><span class="label">광고비 대비 수익(ROAS)</span><span class="value num" id="k-roas">–</span></div>
+      <div class="kpi"><span class="label">설치</span><span class="value num" id="k-installs">–</span></div>
+      <div class="kpi"><span class="label">설치당 비용(CPI)</span><span class="value num" id="k-cpi">–</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head"><h2>성과 깔때기 — 보는 사람이 설치까지 얼마나 오나</h2><span class="sub">이번 달 누적 · 오른쪽은 앞 단계 대비 비율</span></div>
+    <div class="funnel" id="funnel"></div>
+    <div class="insight" id="funnel-insight" hidden></div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head"><h2>일별 추이 (최근 14일)</h2><span class="sub">빈 칸은 그날 아직 측정 안 됨</span></div>
+    <div class="spark-grid" id="trends"></div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head"><h2>게시물 성과</h2>
+      <div class="seg" id="post-filter"><button type="button" data-p="all" aria-pressed="true">전체</button><button type="button" data-p="youtube" aria-pressed="false">유튜브</button><button type="button" data-p="tiktok" aria-pressed="false">틱톡</button><button type="button" data-p="instagram" aria-pressed="false">인스타</button></div>
+    </div>
+    <div class="chips" id="post-totals"></div>
+    <div class="table-wrap"><table><thead><tr><th>플랫폼</th><th>게시물</th><th>게시일</th><th>상태</th><th class="r">조회</th><th class="r">좋아요</th><th class="r">댓글</th></tr></thead><tbody id="posts"></tbody></table></div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head"><h2>준비 상태</h2><span class="sub">셋 다 초록이어야 설치 광고가 돌아갑니다</span></div>
+    <div class="chips" id="prereqs"></div>
+  </section>
+
+  <div class="grid2">
+    <section class="panel">
+      <div class="panel-head"><h2>광고·홍보 채널</h2><span class="sub">이번 달 누적</span></div>
+      <div class="table-wrap"><table><thead><tr><th>채널</th><th>상태</th><th class="r">광고비</th><th class="r">조회/노출</th><th class="r">클릭</th></tr></thead><tbody id="channels"></tbody></table></div>
+    </section>
+    <section class="panel">
+      <div class="panel-head"><h2>오늘 판단과 실행 (DeepSeek)</h2><span class="sub" id="today-date"></span></div>
+      <div id="today"></div>
+    </section>
+  </div>
+
+  <section class="panel">
+    <div class="panel-head"><h2>일별 원장</h2><span class="sub">하루 마지막 수집 값 · 빈 칸은 측정 안 됨</span></div>
+    <div class="table-wrap"><table><thead><tr><th>날짜</th><th class="r">광고비</th><th class="r">광고 노출</th><th class="r">광고 클릭</th><th class="r">게시물 조회(누적)</th><th class="r">소개 페이지 방문</th><th class="r">스토어 클릭</th><th class="r">설치</th><th class="r">수익</th></tr></thead><tbody id="ledger"></tbody></table></div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head"><h2>최근 실행 기록</h2><span class="sub">성공/실패를 보고 다음 판단에 반영</span></div>
+    <div class="table-wrap"><table><thead><tr><th>날짜</th><th>행동</th><th>결과</th><th>내용</th></tr></thead><tbody id="actions"></tbody></table></div>
+  </section>
+
+  <p class="sub">숫자 출처: 광고는 Google Ads, 게시물 조회는 유튜브·틱톡·인스타 화면, 소개 페이지 방문·스토어 클릭은 Google 애널리틱스, 설치는 Play Console, 수익은 AdMob(1달러 1,400원 가정). 자동 프로그램이 1시간마다 갱신합니다.</p>
+</div>
+
+<script>
+var DATA = {"today":"2026-10-03","updated_at":"2026-10-03 23:38","todayBox":{"collected_at":"23:03","videos_today":3,"videos_target":3,"views":{"youtube":{"add":1712,"since":"01:39"},"tiktok":{"add":0,"since":"01:26"},"instagram":{"add":3353,"since":"01:26"}},"landing_views":54,"landing_users":48,"store_clicks":11,"ad_impressions":4298,"ad_clicks":41,"ad_cost":7231},"videos":[{"date":"2026-10-03","time":"23:10","lang":"en","style":"compilation","clips":["03_glass_break_stage4","10_glass_floor_stage13","01_one_line_stage1"],"title":"3 levels, 1 line each","views":{"youtube":null,"tiktok":0,"instagram":null,"facebook":386,"threads":1,"x":13,"pinterest":"fail","bluesky":5},"total":405},{"date":"2026-10-03","time":"18:09","lang":"ko","style":"hook","clips":["07_vortex_stage14"],"title":"이게 들어간다고?","views":{"youtube":350,"tiktok":null,"instagram":205,"facebook":189,"threads":2,"x":"fail","pinterest":"fail","bluesky":0},"total":746},{"date":"2026-10-03","time":"11:18","lang":"en","style":"compilation","clips":["02_miracle_bounce_stage27","03_glass_break_stage4","06_one_pixel_stage14"],"title":"3 levels, 1 line each","views":{"youtube":1168,"tiktok":0,"instagram":null,"facebook":386,"threads":1,"x":13,"pinterest":null,"bluesky":5},"total":1573}],"daily":[{"date":"2026-10-03","ad_spend_krw":7231,"ad_impressions":4298,"ad_clicks":41,"views_cum":8762,"page_views":54,"store_clicks":11,"installs":null,"revenue_krw":0}],"posts":[{"platform":"youtube","title":"유리 바닥을 뚫어라","status":"예약","date":"2026. 10. 8.","views":0,"comments":0,"url":"https://youtube.com/shorts/-vtEcq5FGnY"},{"platform":"youtube","title":"풍차한테 맞아도 들어간다","status":"예약","date":"2026. 10. 7.","views":0,"comments":0,"url":"https://youtube.com/shorts/-ugitc-u6sI"},{"platform":"youtube","title":"어디로 나올지 맞혀봐","status":"예약","date":"2026. 10. 6.","views":0,"comments":0,"url":"https://youtube.com/shorts/faAUoHppI2A"},{"platform":"youtube","title":"바람을 이용해야 산다","status":"예약","date":"2026. 10. 5.","views":0,"comments":0,"url":"https://youtube.com/shorts/3QXclOGVSsg"},{"platform":"youtube","title":"한 끗 차이","status":"예약","date":"2026. 10. 4.","views":0,"comments":0,"url":"https://youtube.com/shorts/QKicEM6j_C4"},{"platform":"youtube","title":"이게 들어간다고? 소용돌이 속 골인 한 끗 차이","status":"공개","date":"2026. 10. 3.","views":350,"comments":1,"url":"https://youtube.com/shorts/RmDVjiOlhrA"},{"platform":"youtube","title":"두 개 다 넣어야 클리어","status":"공개","date":"2026. 10. 3.","views":191,"comments":1,"url":"https://youtube.com/shorts/lSuAjI64UNM"},{"platform":"youtube","title":"3 Levels, ONE Line Each — Can You Beat Them All?","status":"공개","date":"2026. 10. 3.","views":1168,"comments":1,"url":"https://youtube.com/shorts/_MWwJ25qg0E"},{"platform":"youtube","title":"탑을 무너뜨려야 길이 열린다","status":"공개","date":"2026. 10. 2.","views":4,"comments":1,"url":"https://youtube.com/shorts/Kiea7WO-TIE"},{"platform":"youtube","title":"이게 들어간다고?","status":"공개","date":"2026. 10. 1.","views":1158,"comments":1,"url":"https://youtube.com/shorts/wBdPCvogsLM"},{"platform":"youtube","title":"유리는 깨라고 있는 것","status":"공개","date":"2026. 10. 1.","views":1063,"comments":1,"url":"https://youtube.com/shorts/EfduODj9zgI"},{"platform":"youtube","title":"선 딱 하나로 끝냄","status":"공개","date":"2026. 10. 1.","views":978,"comments":1,"url":"https://youtube.com/shorts/-oI346Sun-g"},{"platform":"tiktok","title":"유리 바닥을 뚫어라 💥 선 하나로","status":"예약","date":"10월 8일 오후 6:05","views":0,"likes":0,"comments":0},{"platform":"tiktok","title":"09_windmill_stage9_sound풍차한테","status":"예약","date":"10월 7일 오후 6:00","views":0,"likes":0,"comments":0},{"platform":"tiktok","title":"어디로 나올지 맞혀봐 🌀 선 하나로","status":"예약","date":"10월 6일 오후 6:05","views":0,"likes":0,"comments":0},{"platform":"tiktok","title":"07_vortex_stage14_sound바람을 이용해야","status":"예약","date":"10월 5일 오후 6:05","views":0,"likes":0,"comments":0},{"platform":"tiktok","title":"한 끗 차이로 갈린다 😮 선 하나로","status":"예약","date":"10월 4일 오후 6:00","views":0,"likes":0,"comments":0},{"platform":"tiktok","title":"20261003_mus5zqjc_hook_ko_07_vortex_stage14소용돌이","status":"공개","date":"10월 3일 오후 6:04","views":0,"likes":0,"comments":0},{"platform":"tiktok","title":"두 개 다 넣어야 클리어 ⚽⚽ 선","status":"공개","date":"10월 3일 오후 6:00","views":0,"likes":0,"comments":0},{"platform":"tiktok","title":"One line is all you get —","status":"공개","date":"10월 3일 오전 11:15","views":0,"likes":0,"comments":0},{"platform":"tiktok","title":"탑을 무너뜨려야 길이 열린다 🧱 선","status":"공개","date":"10월 2일 오전 6:27","views":0,"likes":0,"comments":0},{"platform":"instagram","title":"릴스 DeBsjjxhwDg","status":"공개","views":205,"url":"https://www.instagram.com/reel/DeBsjjxhwDg/"},{"platform":"instagram","title":"릴스 DeA9wRaBArD","status":"공개","views":2130,"url":"https://www.instagram.com/reel/DeA9wRaBArD/"},{"platform":"instagram","title":"릴스 Dd94j0BB-1v","status":"공개","views":1396,"url":"https://www.instagram.com/reel/Dd94j0BB-1v/"},{"platform":"instagram","title":"릴스 Dd9ETTzheKw","status":"공개","views":54,"url":"https://www.instagram.com/reel/Dd9ETTzheKw/"},{"platform":"instagram","title":"릴스 Dd9EMdBh-sP","status":"공개","views":49,"url":"https://www.instagram.com/reel/Dd9EMdBh-sP/"},{"platform":"instagram","title":"릴스 Dd9EBYHBb48","status":"공개","views":16,"url":"https://www.instagram.com/reel/Dd9EBYHBb48/"}],"status":{"month_goal":1000000,"month_spend_cap":310000,"released":false,"month_spend":14843,"collected_at":"2026-10-03 23:03","installs_total":null,"landing_7d_users":12,"store_clicks":0,"leak_step":"조회→랜딩(소개 페이지 방문) 전환","summary":"오늘 광고비 6,742원(검색 1,000·쇼츠 6,670)으로 노출 4,245회, 클릭 35회를 기록해 클릭이 30을 넘어 처음으로 예산 조정을 검토할 표본이 생겼다. 유튜브 조회 4,298회, 인스타 조회 3,527회로 콘텐츠 도달은 나쁘지 않지만 랜딩 7일 사용자 12명, 스토어 클릭·설치는 null이고 앱은 released=false로 아직 출시 전이다. AdMob 수익도 0으로 정상이다. 가장 새는 단계는 '조회→랜딩(소개 페이지 방문)' 전환으로, 7,825회 조회 대비 랜딩 사용자 12명에 불과하다. 지난 결정(인스타 게시, 키워드 추가)은 실행됐지만 결과 지표가 아직 잡히지 않아 효과를 판단할 수 없다.","decided_on":"2026-10-03","next_actions":["메모: 앱이 released=false이고 설치·스토어 클릭이 null이므로 실제 스토어 공개 여부와 AdMob 연동 상태를 확인해달라. 출시 전이면 설치 0은 정상이다. 조회→랜딩 전환 누수를 막기 위해 소개 페이지 상단에 '구글 플레이 출시!' 문구와 스토어 링크를 더 눈에 띄게 배치하는 수정을 사람(또는 Claude)이 한 번 해주길 요청. 또한 출시 직후 3일 전략에 따라 구글 앱 설치 캠페인과 메타 앱 홍보 캠페인(하루 2,330원, 스토어 직접 연결)을 사람이 만들어야 한다."],"dropped":["ads_budget: 현재와 같음"],"prereqs":[{"label":"스토어 출시","state":"wait","note":"아직 공개 전(업로드 키 승인 대기)"},{"label":"게임 속 광고(AdMob)","state":"wait","note":"광고 들어간 버전 출시 후 수익 발생"},{"label":"광고 집행","state":"ok","note":"하루 10,000원 · 월 310,000원 한도"}]},"channels":[{"name":"유튜브 쇼츠 영상 광고","state":"ok","state_label":"운영 중","spend":14354,"reach":8073,"clicks":54,"note":"하루 6670원"},{"name":"구글 검색 광고","state":"ok","state_label":"운영 중","spend":489,"reach":53,"clicks":6,"note":"하루 1000원"},{"name":"유튜브 쇼츠 (무료)","state":"ok","state_label":"자동 게시","spend":null,"reach":4912,"clicks":null,"note":"@highballgame"},{"name":"틱톡 (무료)","state":"wait","state_label":"조회 0","spend":null,"reach":0,"clicks":null,"note":"@djseo1004"},{"name":"페이스북 페이지 릴스 (무료)","state":"ok","state_label":"자동 게시 · 하루 3편","spend":null,"reach":887,"clicks":null,"note":"하이볼 High Ball 페이지"},{"name":"스레드 (무료)","state":"ok","state_label":"자동 게시 · 하루 3편","spend":null,"reach":13,"clicks":null,"note":"@dongjun10004"},{"name":"X (무료)","state":"ok","state_label":"자동 게시 · 하루 3편","spend":null,"reach":13,"clicks":null,"note":"@dongjun10031"},{"name":"블루스카이 (무료, 반응 수)","state":"ok","state_label":"자동 게시 · 하루 3편","spend":null,"reach":5,"clicks":null,"note":"@dongjun1003.bsky.social"},{"name":"핀터레스트 (무료)","state":"wait","state_label":"자동 게시 · 조회수 수집 전","spend":null,"reach":null,"clicks":null,"note":"High Ball - one line physics puzzle"},{"name":"인스타 릴스 (무료)","state":"ok","state_label":"매일 저녁 게시","spend":null,"reach":3850,"clicks":null,"note":"@dongjun10004"}],"actions":[{"date":"2026-10-03","type":"bluesky_post","ok":true,"detail":"/profile/dongjun1003.bsky.social/post/3mwy2tsvfzk2u"},{"date":"2026-10-03","type":"pinterest_pin","ok":false,"detail":"locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: /^게시$/ }).visible().first()\u001b[22m\n\u001b[2m    - locator resolved to \u003cbutton disabled type=\"button\" class=\"G0yGFD ap8aAM Q3hcOU itmoZr d2DOkX GaMK1V\">…\u003c/button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m"},{"date":"2026-10-03","type":"x_post","ok":true,"detail":"/dongjun10031/status/2106385792503619616"},{"date":"2026-10-03","type":"threads_post","ok":true,"detail":"/@dongjun10004/post/DeCPF37kShY"},{"date":"2026-10-03","type":"facebook_reel","ok":true,"detail":"20261003_musgp7ra_compilation_en_03_glass_break_stage4.mp4"},{"date":"2026-10-03","type":"instagram_post","ok":true,"detail":"DeCO3C8hDQI"},{"date":"2026-10-03","type":"tiktok_upload","ok":true,"detail":"20261003_musgp7ra_compilation_en_03_glass_break_stage4.mp4"},{"date":"2026-10-03","type":"youtube_upload","ok":true,"detail":"https://youtube.com/shorts/GanBhZtWFHA"},{"date":"2026-10-03","type":"bluesky_post","ok":true,"detail":"/profile/dongjun1003.bsky.social/post/3mwxk2x2tk22m"},{"date":"2026-10-03","type":"pinterest_pin","ok":false,"detail":"locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: /^게시$/ }).visible().first()\u001b[22m\n\u001b[2m    - locator resolved to \u003cbutton disabled type=\"button\" class=\"G0yGFD ap8aAM Q3hcOU itmoZr d2DOkX GaMK1V\">…\u003c/button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m"},{"date":"2026-10-03","type":"x_post","ok":false,"detail":"locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('[data-testid=\"tweetTextarea_0\"]').first()\u001b[22m\n\u001b[2m    - locator resolved to \u003cdiv tabindex=\"0\" role=\"textbox\" spellcheck=\"true\" aria-label=\"게시물 본문\" aria-multiline=\"true\" contenteditable=\"true\" aria-autocomplete=\"list\" da"},{"date":"2026-10-03","type":"threads_post","ok":true,"detail":"/@dongjun10004/post/DeBsuwCEZ_z"},{"date":"2026-10-03","type":"facebook_reel","ok":true,"detail":"20261003_mus5zqjc_hook_ko_07_vortex_stage14.mp4"},{"date":"2026-10-03","type":"instagram_post","ok":true,"detail":"DeBsjjxhwDg"},{"date":"2026-10-03","type":"tiktok_upload","ok":true,"detail":"20261003_mus5zqjc_hook_ko_07_vortex_stage14.mp4"},{"date":"2026-10-03","type":"youtube_upload","ok":true,"detail":"https://youtube.com/shorts/RmDVjiOlhrA"},{"date":"2026-10-03","type":"youtube_comment","ok":true,"detail":"lSuAjI64UNM"},{"date":"2026-10-03","type":"note","ok":true,"detail":"앱이 released=false이고 설치·스토어 클릭이 null이므로 실제 스토어 공개 여부와 AdMob 연동 상태를 확인해달라. 출시 전이면 설치 0은 정상이다. 조회→랜딩 전환 누수를 막기 위해 소개 페이지 상단에 '구글 플레이 출시!' 문구와 스토어 링크를 더 눈에 띄게 배치하는 수정을 사람(또는 Claude)이 한 번 해주길 요청. 또한 출시 직후 3일 전략에 따라 구글 앱 설치 캠페인과 메타 앱 홍보 캠페인(하루 2,330원, 스토어 직접 연결)을 사람이 만들어야 한다."},{"date":"2026-10-03","type":"threads_post","ok":true,"detail":"/@dongjun10004/post/DeA960nEWAU"},{"date":"2026-10-03","type":"facebook_reel","ok":true,"detail":"20261003_murrdqyb_compilation_en_02_miracle_bounce_stage27.mp4"},{"date":"2026-10-03","type":"instagram_post","ok":true,"detail":"20261003_murrdqyb_compilation_en_02_miracle_bounce_stage27.mp4"},{"date":"2026-10-03","type":"tiktok_upload","ok":true,"detail":"20261003_murrdqyb_compilation_en_02_miracle_bounce_stage27.mp4"},{"date":"2026-10-03","type":"youtube_upload","ok":true,"detail":"https://youtube.com/shorts/_MWwJ25qg0E"},{"date":"2026-10-03","type":"note","ok":true,"detail":"조회→랜딩 전환 누수를 막기 위해 소개 페이지 상단에 '구글 플레이 출시!' 문구와 스토어 링크를 더 눈에 띄게 배치하는 수정을 사람(또는 Claude)이 한 번 해주길 요청. 또한 앱이 released=true인데 AdMob 수익이 0이고 설치도 null이므로, 실제 스토어 공개 여부와 AdMob 연동 상태를 확인해달라."},{"date":"2026-10-03","type":"ads_keywords_add","ok":true,"detail":"하이볼 게임, 하이볼 퍼즐, 선 긋기 퍼즐 게임, 네온 퍼즐 게임, 공 넣기 퍼즐, physics puzzle game, draw line puzzle, neon ball puzzle, line drawing game, ball goal puzzle"}]};
+(function () {
+  "use strict";
+  var D = DATA || { daily: [], posts: [], channels: [], status: {}, actions: [] };
+  var PLATFORM = { youtube: "유튜브", tiktok: "틱톡", instagram: "인스타" };
+  function $(id) { return document.getElementById(id); }
+  function won(n) { return (n == null || isNaN(n)) ? "–" : Math.round(n).toLocaleString("ko-KR") + "원"; }
+  function int(n) { return (n == null || isNaN(n)) ? "–" : Math.round(n).toLocaleString("ko-KR"); }
+  function num(v) { return (v === "" || v == null) ? null : Number(v); }
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  var TODAY = D.today;
+  function lastDays(n) { var out = [], t = new Date(TODAY + "T00:00:00Z"); for (var i = n - 1; i >= 0; i--) out.push(new Date(t.getTime() - i * 864e5).toISOString().slice(0, 10)); return out; }
+  function sumKnown(rows, key) { var s = 0, any = false; rows.forEach(function (r) { var v = num(r[key]); if (v != null) { s += v; any = true; } }); return any ? s : null; }
+  var month = TODAY.slice(0, 7);
+  var mrows = D.daily.filter(function (r) { return String(r.date).slice(0, 7) === month; });
+  var st = D.status || {};
+
+  // 영상별 성과
+  (function () {
+    var V = D.videos || [], P = ["youtube", "tiktok", "instagram", "facebook", "threads", "x", "pinterest", "bluesky", "naver"];
+    var NAME = { youtube: "유튜브", tiktok: "틱톡", instagram: "인스타", facebook: "페북", threads: "스레드", x: "X", pinterest: "핀터", bluesky: "블루스카이", naver: "네이버" };
+    var used = P.filter(function (p) { return V.some(function (v) { return v.views && p in v.views; }); });
+    var head = $("vp-head");
+    ["날짜", "언어", "형식", "제목"].concat(used.map(function (p) { return NAME[p]; })).concat(["합계"]).forEach(function (h, i) { head.appendChild(el("th", i >= 4 ? "r" : null, h)); });
+    var body = $("vp-body");
+    if (!V.length) { var tr0 = el("tr"), td0 = el("td", "empty", "아직 자동으로 올린 영상이 없습니다."); td0.colSpan = 5 + used.length; tr0.appendChild(td0); body.appendChild(tr0); }
+    var STY = { hook: "훅", slowmo: "슬로모션", freeze: "멈춤 퀴즈", compilation: "모음" };
+    V.forEach(function (v) {
+      var tr = el("tr"); tr.appendChild(el("td", "num", (v.date || "").slice(5) + " " + (v.time || "")));
+      tr.appendChild(el("td", null, v.lang === "ko" ? "한국어" : "영어")); tr.appendChild(el("td", null, STY[v.style] || v.style));
+      var t = el("td", null, v.title || ""); t.style.whiteSpace = "normal"; t.style.minWidth = "140px"; tr.appendChild(t);
+      used.forEach(function (p) { var x = v.views ? v.views[p] : undefined; tr.appendChild(el("td", "r num", x === "fail" ? "✕" : (x == null ? "" : int(x)))); });
+      tr.appendChild(el("td", "r num", int(v.total))); body.appendChild(tr);
+    });
+    // 형식·언어별 평균(판단 근거)
+    var g = {}; V.forEach(function (v) { var k = (STY[v.style] || v.style) + " · " + (v.lang === "ko" ? "한국어" : "영어"); (g[k] = g[k] || []).push(v.total || 0); });
+    var box = $("style-avg");
+    Object.keys(g).sort(function (a, b) { return avg(g[b]) - avg(g[a]); }).forEach(function (k) { box.appendChild(el("span", "chip ok", k + " 평균 " + int(avg(g[k])) + "회 (" + g[k].length + "편)")); });
+    function avg(a) { return a.reduce(function (s, x) { return s + x; }, 0) / (a.length || 1); }
+  })();
+
+  // 목표
+  var goal = st.month_goal || 1000000, rev = sumKnown(mrows, "revenue_krw") || 0, spend = st.month_spend != null ? st.month_spend : (sumKnown(mrows, "ad_spend_krw") || 0);
+  var pct = Math.min(100, rev / goal * 100);
+  $("goal-rev").textContent = won(rev); $("goal-target").textContent = "/ " + won(goal) + " (" + pct.toFixed(1) + "%)";
+  $("goal-period").textContent = month.replace("-", "년 ") + "월"; $("goal-meter").firstElementChild.style.width = pct + "%";
+  var day = +TODAY.slice(8, 10), dim = new Date(+TODAY.slice(0, 4), +TODAY.slice(5, 7), 0).getDate();
+  $("goal-pace").textContent = "지금 속도면 월말 " + won(rev / day * dim) + " · 남은 " + (dim - day) + "일";
+  $("k-spend").textContent = won(spend); $("k-left").textContent = won(Math.max(0, (st.month_spend_cap || 310000) - spend));
+  $("k-roas").textContent = spend > 0 ? Math.round(rev / spend * 100) + "%" : "–";
+  var inst = st.installs_total; $("k-installs").textContent = st.released === false ? "출시 전" : int(inst);
+  $("k-cpi").textContent = inst ? won(spend / inst) : "–";
+  $("updated").textContent = "마지막 갱신 " + D.updated_at;
+
+  // 오늘 한 줄
+  var T = D.todayBox, tk = $("today-kpis");
+  function kpi(label, value, sub) { var k = el("div", "kpi"); k.appendChild(el("span", "label", label)); k.appendChild(el("span", "value num", value)); if (sub) k.appendChild(el("span", "sub", sub)); tk.appendChild(k); }
+  if (!T) tk.appendChild(el("p", "empty", "오늘 아직 수집 전입니다."));
+  else {
+    $("today-since").textContent = T.collected_at + " 수집 · 1시간마다 갱신";
+    kpi("오늘 올린 영상", int(T.videos_today) + " / " + int(T.videos_target), "5개 매체 동시 게시");
+    ["youtube", "tiktok", "instagram"].forEach(function (p) { var v = T.views[p]; kpi(PLATFORM[p] + " 조회", v ? "+" + int(v.add) : "–", v ? (v.since === "어제" ? "어제 대비" : v.since + " 이후") : "측정 기준 없음"); });
+    kpi("소개 페이지 방문", int(T.landing_views), T.landing_users != null ? int(T.landing_users) + "명" : "");
+    kpi("스토어 클릭", int(T.store_clicks), "구글 플레이 버튼");
+    kpi("광고 클릭", int(T.ad_clicks), T.ad_impressions != null ? "노출 " + int(T.ad_impressions) : "");
+    kpi("광고비", won(T.ad_cost), "구글 광고");
+  }
+
+  // 깔때기
+  var postViews = D.posts.filter(function (p) { return p.status !== "예약"; }).reduce(function (a, p) { return a + (num(p.views) || 0); }, 0);
+  var steps = [
+    { name: "광고 노출", hint: "구글 광고가 보인 횟수", v: sumKnown(mrows, "ad_impressions") },
+    { name: "게시물 조회", hint: "쇼츠·틱톡·릴스 누적", v: D.posts.length ? postViews : null },
+    { name: "광고 클릭", hint: "광고 눌러 페이지로", v: sumKnown(mrows, "ad_clicks") },
+    { name: "소개 페이지 방문", hint: "지난 7일 방문자", v: st.landing_7d_users },
+    { name: "스토어 클릭", hint: "구글 플레이 버튼", v: st.store_clicks },
+    { name: "설치", hint: "Play Console", v: st.released === false ? null : inst }
+  ];
+  var top = Math.max.apply(null, steps.map(function (s) { return s.v || 0; })) || 1, worst = null, box = $("funnel");
+  steps.forEach(function (s, i) {
+    var row = el("div", "fstep"), nm = el("div", "name", s.name); nm.appendChild(el("small", null, s.hint)); row.appendChild(nm);
+    var tr = el("div", "ftrack" + (s.v == null ? " unknown" : "")), fill = el("span");
+    fill.style.width = s.v ? Math.max(2, Math.log10(s.v + 1) / Math.log10(top + 1) * 100) + "%" : "0";
+    tr.appendChild(fill); tr.appendChild(el("b", null, s.v == null ? "측정 전" : int(s.v))); row.appendChild(tr);
+    var prev = i > 0 ? steps[i - 1].v : null, rate = el("span", "rate", i > 0 ? "–" : "");
+    if (i > 0 && prev && s.v != null) { var r = s.v / prev * 100; rate.textContent = (r >= 10 ? r.toFixed(0) : r.toFixed(1)) + "%"; if (r < 2) { rate.classList.add("low"); if (!worst || r < worst.r) worst = { r: r, from: steps[i - 1].name, to: s.name }; } }
+    row.appendChild(rate); box.appendChild(row);
+  });
+  if (st.leak_step || worst) { $("funnel-insight").textContent = "가장 많이 새는 곳: " + (st.leak_step || (worst.from + " → " + worst.to)) + ". 자동 프로그램이 이 구간부터 고칩니다."; $("funnel-insight").hidden = false; }
+
+  // 추이
+  var NS = "http://www.w3.org/2000/svg";
+  function sparkCard(label, days, vals, unit) {
+    var W = 280, H = 64, svg = document.createElementNS(NS, "svg"); svg.setAttribute("viewBox", "0 0 " + W + " " + H); svg.setAttribute("preserveAspectRatio", "none");
+    var known = vals.filter(function (v) { return v != null; }), max = Math.max(1, Math.max.apply(null, known.length ? known : [0])), bw = (W - 4) / vals.length;
+    vals.forEach(function (v, i) { if (v == null) return; var h = v === 0 ? 1 : Math.max(2, v / max * (H - 6)), r = document.createElementNS(NS, "rect");
+      r.setAttribute("x", 2 + i * bw + bw * 0.12); r.setAttribute("width", bw * 0.76); r.setAttribute("y", H - h); r.setAttribute("height", h); r.setAttribute("rx", 1.5);
+      r.setAttribute("fill", i === vals.length - 1 ? "var(--accent)" : "var(--bar)"); var t = document.createElementNS(NS, "title"); t.textContent = days[i] + " · " + v.toLocaleString("ko-KR"); r.appendChild(t); svg.appendChild(r); });
+    var wrap = el("div", "spark"), row = el("div", "row"); row.appendChild(el("span", null, label));
+    var last = vals[vals.length - 1], total = vals.reduce(function (a, v) { return a + (v || 0); }, 0);
+    row.appendChild(el("span", "num", "오늘 " + (last == null ? "–" : int(last) + unit) + " · 14일 " + (known.length ? int(total) + unit : "–"))); wrap.appendChild(row);
+    if (!known.length) wrap.appendChild(el("div", "none", "아직 측정한 날이 없습니다."));
+    wrap.appendChild(svg); var ax = el("div", "axis"); ax.appendChild(el("span", "num", days[0].slice(5))); ax.appendChild(el("span", "num", "최대 " + int(max))); ax.appendChild(el("span", "num", days[days.length - 1].slice(5))); wrap.appendChild(ax);
+    return wrap;
+  }
+  var days = lastDays(14), by = {}; D.daily.forEach(function (r) { by[r.date] = r; });
+  function series(k) { return days.map(function (d) { return by[d] ? num(by[d][k]) : null; }); }
+  var prev = null, vd = days.map(function (d) { var c = by[d] ? num(by[d].views_cum) : null; var o = (c != null && prev != null) ? Math.max(0, c - prev) : null; if (c != null) prev = c; return o; });
+  var tb = $("trends");
+  [["광고비", series("ad_spend_krw"), "원"], ["광고 노출", series("ad_impressions"), ""], ["광고 클릭", series("ad_clicks"), ""], ["게시물 조회 (하루 증가)", vd, ""],
+   ["소개 페이지 방문", series("page_views"), ""], ["스토어 클릭", series("store_clicks"), ""], ["설치(누적)", series("installs"), ""], ["수익", series("revenue_krw"), "원"]].forEach(function (x) { tb.appendChild(sparkCard(x[0], days, x[1], x[2])); });
+
+  // 게시물
+  var filter = "all";
+  function renderPosts() {
+    var tot = $("post-totals"); tot.replaceChildren();
+    ["youtube", "tiktok", "instagram"].forEach(function (p) {
+      var list = D.posts.filter(function (x) { return x.platform === p; }), live = list.filter(function (x) { return x.status !== "예약"; });
+      var v = live.reduce(function (a, x) { return a + (num(x.views) || 0); }, 0);
+      tot.appendChild(el("span", "chip " + ({ youtube: "yt", tiktok: "tt", instagram: "ig" })[p], PLATFORM[p] + " " + live.length + "편 · 조회 " + int(v) + (live.length ? " · 편당 " + int(v / live.length) : "") + (list.length - live.length ? " · 예약 " + (list.length - live.length) : "")));
+    });
+    var body = $("posts"); body.replaceChildren();
+    var list = D.posts.filter(function (p) { return filter === "all" || p.platform === filter; }).sort(function (a, b) { if ((a.status === "예약") !== (b.status === "예약")) return a.status === "예약" ? 1 : -1; return (num(b.views) || 0) - (num(a.views) || 0); });
+    if (!list.length) { var tr0 = el("tr"), td0 = el("td", "empty", "게시물 기록이 없습니다."); td0.colSpan = 7; tr0.appendChild(td0); body.appendChild(tr0); return; }
+    var maxV = Math.max.apply(null, list.map(function (p) { return num(p.views) || 0; })) || 1;
+    list.forEach(function (p) {
+      var tr = el("tr"), pf = el("td"); pf.appendChild(el("span", "pf " + p.platform)); pf.appendChild(document.createTextNode(PLATFORM[p.platform])); tr.appendChild(pf);
+      var t = el("td"); t.style.whiteSpace = "normal"; t.style.minWidth = "160px";
+      if (p.url) { var a = el("a", null, p.title || p.url); a.href = p.url; a.target = "_blank"; a.rel = "noopener"; t.appendChild(a); } else t.textContent = p.title || "";
+      tr.appendChild(t); tr.appendChild(el("td", "num", p.date || ""));
+      var s = el("td"); s.appendChild(el("span", "tag " + (p.status === "예약" ? "wait" : "ok"), p.status || "")); tr.appendChild(s);
+      var v = el("td", "r num", p.status === "예약" ? "–" : int(num(p.views)));
+      if (p.status !== "예약" && num(p.views)) { var b = el("span", "vbar"); b.style.width = Math.max(2, num(p.views) / maxV * 60) + "px"; v.appendChild(b); }
+      tr.appendChild(v); tr.appendChild(el("td", "r num", p.likes == null ? "–" : int(p.likes))); tr.appendChild(el("td", "r num", p.comments == null ? "–" : int(p.comments)));
+      body.appendChild(tr);
+    });
+  }
+  $("post-filter").addEventListener("click", function (e) { var b = e.target.closest("button"); if (!b) return; filter = b.getAttribute("data-p"); [].forEach.call(this.querySelectorAll("button"), function (x) { x.setAttribute("aria-pressed", String(x === b)); }); renderPosts(); });
+  renderPosts();
+
+  // 준비 상태
+  var pre = $("prereqs"); (st.prereqs || []).forEach(function (p) { pre.appendChild(el("span", "chip " + p.state, p.label + (p.note ? " — " + p.note : ""))); });
+
+  // 채널
+  var cb = $("channels"); (D.channels || []).forEach(function (c) {
+    var tr = el("tr"), n = el("td"); n.appendChild(el("div", null, c.name)); if (c.note) n.appendChild(el("div", "sub", c.note)); n.style.whiteSpace = "normal"; n.style.minWidth = "170px"; tr.appendChild(n);
+    var s = el("td"); s.appendChild(el("span", "tag " + c.state, c.state_label)); tr.appendChild(s);
+    tr.appendChild(el("td", "r num", c.spend == null ? "–" : won(c.spend))); tr.appendChild(el("td", "r num", int(c.reach))); tr.appendChild(el("td", "r num", int(c.clicks)));
+    cb.appendChild(tr);
+  });
+
+  // 오늘 판단
+  var td = $("today"); $("today-date").textContent = st.decided_on ? st.decided_on + " 기준" : "";
+  if (st.summary) td.appendChild(el("p", null, st.summary)); else td.appendChild(el("p", "empty", "매일 10시 이후 첫 실행에서 채워집니다."));
+  if ((st.next_actions || []).length) { var ul = el("ul", "list"); st.next_actions.forEach(function (a) { ul.appendChild(el("li", null, a)); }); td.appendChild(ul); }
+  if ((st.dropped || []).length) { td.appendChild(el("h2", null, "안전장치가 막은 것")); var ul2 = el("ul", "list"); st.dropped.forEach(function (a) { ul2.appendChild(el("li", "sub", a)); }); td.appendChild(ul2); }
+
+  // 원장
+  var lb = $("ledger"); D.daily.slice().reverse().forEach(function (r) {
+    var tr = el("tr"); tr.appendChild(el("td", "num", r.date));
+    [["ad_spend_krw", won], ["ad_impressions", int], ["ad_clicks", int], ["views_cum", int], ["page_views", int], ["store_clicks", int], ["installs", int], ["revenue_krw", won]].forEach(function (f) { var v = num(r[f[0]]); tr.appendChild(el("td", "r num", v == null ? "" : f[1](v))); });
+    lb.appendChild(tr);
+  });
+
+  // 실행 기록
+  var ab = $("actions"); (D.actions || []).forEach(function (a) {
+    var tr = el("tr"); tr.appendChild(el("td", "num", a.date)); tr.appendChild(el("td", null, a.type));
+    var s = el("td"); s.appendChild(el("span", "tag " + (a.ok ? "ok" : "no"), a.ok ? "성공" : "실패")); tr.appendChild(s);
+    var d = el("td", "sub", a.detail); d.style.whiteSpace = "normal"; tr.appendChild(d); ab.appendChild(tr);
+  });
+  if (!(D.actions || []).length) { var tr1 = el("tr"), td1 = el("td", "empty", "아직 실행 기록이 없습니다."); td1.colSpan = 4; tr1.appendChild(td1); ab.appendChild(tr1); }
+})();
+</script>
+</body>
+</html>
