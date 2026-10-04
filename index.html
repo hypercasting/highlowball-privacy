@@ -17,7 +17,7 @@
 <body>
 <p><a href="index-ko.html">한국어로 보기</a></p>
 <h1>Privacy Policy (High Ball)</h1>
-<p class="updated">Last updated: 2026-09-29</p>
+<p class="updated">Last updated: 2026-10-05</p>
 
 <p>This Privacy Policy explains how HyperCasting ("we", "the developer") collects, uses and stores
 information through the mobile game "High Ball" (package name <code>com.hypercasting.highlowball</code>, "the App").</p>
@@ -34,13 +34,40 @@ Supabase, which issues a random user ID for your device. Under that ID we store:
 <tr><td>Replay data: the lines you drew and the ball's trajectory</td><td>Replays, rankings, fair-play checks</td><td>Some replays (see Section 3)</td></tr>
 <tr><td>Live run position while a run is in progress</td><td>Live spectating</td><td>Yes, during the run</td></tr>
 <tr><td>Multiplayer room participation, attempts and results</td><td>Run multiplayer rooms</td><td>Yes, to players in the same room</td></tr>
-<tr><td>Hearts (skip tokens) and in-game notifications (e.g. "a new season opened")</td><td>Game features</td><td>No</td></tr>
+<tr><td>Hearts (skip tokens), number of hearts earned from ads per day, and in-game notifications (e.g. "a new season opened")</td><td>Game features, daily limit on ad rewards</td><td>No</td></tr>
 </table>
 <p>The App also keeps some data only on your device: settings (sound, vibration, language, colors),
-a cache of the stage list, and the sign-in session that lets you keep the same anonymous account
-between launches.</p>
-<p>The App contains no advertising SDKs and no analytics SDKs, and Unity Analytics and crash
-reporting are disabled. The App does not currently collect push notification tokens.</p>
+a cache of the stage list, the sign-in session that lets you keep the same anonymous account
+between launches, and your ad consent choice (stored by Google UMP).</p>
+<p><strong>Push notification token:</strong> to send game alerts while the App is closed (for example
+"someone beat your time", "Season Elite reached" or rank changes), we store the device token issued by
+Google Firebase Cloud Messaging (FCM) and your alert language (Korean/English) with your anonymous user ID.
+If you don't allow notifications, none are shown, and you can turn them off any time in your device settings.
+The token is used only to deliver these alerts. How Google handles FCM data:
+<a href="https://firebase.google.com/support/privacy">https://firebase.google.com/support/privacy</a></p>
+<p>The App does not use analytics. Google Analytics collection bundled with the Firebase SDK is turned off,
+and Unity Analytics and crash reporting are disabled.</p>
+
+<h2 id="ads">1a. Advertising (Google AdMob)</h2>
+<p>The App is free and shows ads from Google AdMob. Currently it offers rewarded ads that play only
+when you tap to watch one (you receive 1 heart). To serve and measure ads, the Google AdMob SDK
+collects the following on your device and sends it to Google:</p>
+<ul>
+<li>Advertising ID (Android advertising ID) and app set ID</li>
+<li>Device and app information (device model, OS version, language, screen size, etc.)</li>
+<li>IP address (and an approximate location derived from it — precise location is not collected)</li>
+<li>Ad interactions such as impressions and clicks, and diagnostic data</li>
+</ul>
+<p>This information is used to deliver ads, measure ad performance, prevent fraud and, where you have
+consented, show personalized ads. We do not store your advertising ID ourselves or link it to your game
+account. How Google uses this information:
+<a href="https://policies.google.com/technologies/partner-sites">https://policies.google.com/technologies/partner-sites</a>.
+Google Privacy Policy: <a href="https://policies.google.com/privacy">https://policies.google.com/privacy</a></p>
+<p><strong>Consent and opting out:</strong> in regions that require consent (EEA, UK, Switzerland, etc.) Google's
+consent form (UMP) appears on first launch, and you can change or withdraw your choice at any time in
+<em>Settings → Privacy → Privacy options</em> in the App. In every region you can limit use of the advertising ID
+in your device settings (Settings → Google → Ads → delete advertising ID or opt out of personalization).
+The App is intended for users aged 13 and over and does not use child-directed ad settings.</p>
 
 <h2>2. Storage and Processing</h2>
 <p>Data is sent over encrypted connections (HTTPS/WSS) and stored by our backend provider,
@@ -50,8 +77,9 @@ Supabase (infrastructure hosted on Amazon Web Services). See
 <h2>3. Information Sharing</h2>
 <p>Your nickname, times and ranks appear on public leaderboards. Replays can be watched by other
 players ranked close to you; the replays of the top 10 players of each stage are kept private by
-the server. We do not sell, rent or share your information with third parties for advertising or
-any other purpose beyond operating the game as described here.</p>
+the server. To show ads, the Google AdMob SDK sends the information in Section 1a directly to Google.
+Apart from that, we do not sell, rent or share your game data with third parties for any purpose beyond
+operating the game as described here.</p>
 
 <h2>4. Data Retention</h2>
 <p>Game data is kept while your account exists. Uninstalling the App does not delete server data
@@ -63,7 +91,7 @@ This immediately and permanently deletes your account and all associated server 
 rankings, replays, nickname, hearts, notifications and multiplayer history), clears the App's data
 on your device, and closes the App. The next launch starts a new, empty account.</p>
 <p><strong>By email:</strong> if you no longer have the App installed, email
-<a href="mailto:joongangatech@gmail.com">joongangatech@gmail.com</a> with the subject
+<a href="mailto:dongjun1003@gmail.com">dongjun1003@gmail.com</a> with the subject
 "High Ball data deletion" and your nickname and any identifying details you can provide
 (e.g. a screenshot of your records). We will delete the matching account within 30 days.
 Details: <a href="delete-account.html">delete-account.html</a>.</p>
@@ -79,7 +107,7 @@ we will delete it.</p>
 methods above.</p>
 
 <h2>8. Contact</h2>
-<p>HyperCasting — Email: <a href="mailto:joongangatech@gmail.com">joongangatech@gmail.com</a></p>
+<p>HyperCasting — Email: <a href="mailto:dongjun1003@gmail.com">dongjun1003@gmail.com</a></p>
 
 <h2>9. Changes to This Policy</h2>
 <p>We will post any changes on this page and update the date above.</p>
