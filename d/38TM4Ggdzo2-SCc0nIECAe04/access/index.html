@@ -1,0 +1,609 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>High Ball 접속 현황</title>
+<style>
+/* 접속 현황판. publish.js 가 아래 스크립트의 Supabase 주소·anon 키 자리를 채워 d/<토큰>/access/ 에 올린다.
+   데이터는 열 때마다 049 get_access_dashboard(열쇠 = 주소의 토큰)를 불러 받는다. 30초마다 다시 받는다. */
+:root {
+  color-scheme: light;
+  --page: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink2: #52514e; --muted: #898781;
+  --grid: #e1e0d9; --axis: #c3c2b7; --ring: rgba(11,11,11,0.10);
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100;
+  --seq1: #cde2fb; --seq2: #9ec5f4; --seq3: #6da7ec; --seq4: #3987e5; --seq5: #256abf; --seq6: #184f95;
+  --good: #006300; --bad: #d03b3b; --live: #0ca30c;
+  --font: system-ui, -apple-system, "Segoe UI", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface: #1a1a19; --ink: #ffffff; --ink2: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --axis: #383835; --ring: rgba(255,255,255,0.10);
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
+    --seq1: #104281; --seq2: #184f95; --seq3: #1c5cab; --seq4: #2a78d6; --seq5: #5598e7; --seq6: #9ec5f4;
+    --good: #0ca30c; --bad: #e66767;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0d0d0d; --surface: #1a1a19; --ink: #ffffff; --ink2: #c3c2b7; --muted: #898781;
+  --grid: #2c2c2a; --axis: #383835; --ring: rgba(255,255,255,0.10);
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
+  --seq1: #104281; --seq2: #184f95; --seq3: #1c5cab; --seq4: #2a78d6; --seq5: #5598e7; --seq6: #9ec5f4;
+  --good: #0ca30c; --bad: #e66767;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page); color: var(--ink); font-family: var(--font); font-size: 14px; line-height: 1.5; }
+a { color: var(--s1); }
+.wrap { max-width: 1180px; margin: 0 auto; padding: 20px 16px 56px; display: grid; gap: 16px; }
+header { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 16px; }
+h1 { font-size: 1.4rem; margin: 0; } h2 { font-size: 1rem; margin: 0; } h3 { font-size: 0.85rem; margin: 0; color: var(--ink2); font-weight: 600; }
+.sub { color: var(--muted); font-size: 0.82rem; }
+.tab { font-variant-numeric: tabular-nums; }
+.panel { background: var(--surface); border: 1px solid var(--ring); border-radius: 10px; padding: 16px; display: grid; gap: 12px; align-content: start; min-width: 0; }
+.panel-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 12px; }
+.grid2 { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); }
+.grid3 { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.notice { border-radius: 8px; padding: 10px 12px; background: var(--surface); border: 1px dashed var(--axis); color: var(--ink2); font-size: 0.85rem; }
+.notice.err { border-color: var(--bad); color: var(--bad); }
+.kpis { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+.kpi { background: var(--surface); border: 1px solid var(--ring); border-radius: 10px; padding: 12px 14px; display: grid; gap: 2px; }
+.kpi .label { font-size: 0.78rem; color: var(--ink2); }
+.kpi .value { font-size: 1.45rem; font-weight: 650; line-height: 1.2; }
+.kpi .delta { font-size: 0.76rem; color: var(--muted); }
+.kpi .delta.up { color: var(--good); } .kpi .delta.down { color: var(--bad); }
+.live { display: flex; flex-wrap: wrap; gap: 16px 28px; align-items: center; }
+.live-big { display: flex; align-items: baseline; gap: 8px; }
+.live-big .n { font-size: 2.6rem; font-weight: 700; line-height: 1; }
+.dot { width: 10px; height: 10px; border-radius: 50%; background: var(--live); display: inline-block; box-shadow: 0 0 0 0 rgba(12,163,12,0.5); animation: pulse 2s infinite; }
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(12,163,12,0.45); } 70% { box-shadow: 0 0 0 8px rgba(12,163,12,0); } 100% { box-shadow: 0 0 0 0 rgba(12,163,12,0); } }
+@media (prefers-reduced-motion: reduce) { .dot { animation: none; } }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { border: 1px solid var(--ring); border-radius: 999px; padding: 2px 10px; font-size: 0.8rem; color: var(--ink2); background: var(--page); }
+.chip b { color: var(--ink); font-weight: 650; }
+.seg { display: inline-flex; border: 1px solid var(--ring); border-radius: 8px; overflow: hidden; }
+.seg button { border: 0; background: transparent; color: var(--ink2); font: inherit; font-size: 0.8rem; padding: 5px 10px; cursor: pointer; min-height: 30px; }
+.seg button[aria-pressed="true"] { background: var(--s1); color: #fff; }
+.chart { position: relative; width: 100%; }
+.chart svg { display: block; width: 100%; overflow: visible; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 0.8rem; color: var(--ink2); }
+.legend i { display: inline-block; width: 12px; height: 3px; border-radius: 2px; vertical-align: middle; margin-right: 6px; }
+.legend i.bar { height: 10px; width: 10px; border-radius: 2px; }
+.tip { position: fixed; z-index: 10; pointer-events: none; background: var(--surface); color: var(--ink); border: 1px solid var(--ring); border-radius: 8px; padding: 8px 10px; font-size: 0.8rem; box-shadow: 0 4px 16px rgba(0,0,0,0.15); display: none; min-width: 120px; }
+.tip .t { color: var(--ink2); margin-bottom: 4px; }
+.tip .r { display: flex; justify-content: space-between; gap: 14px; }
+.tip .r span:first-child { color: var(--ink2); }
+.tip i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 6px; }
+.hbars { display: grid; gap: 6px; }
+.hbar { display: grid; grid-template-columns: minmax(80px, 38%) 1fr auto; gap: 8px; align-items: center; font-size: 0.82rem; }
+.hbar .k { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink); }
+.hbar .track { height: 10px; background: transparent; position: relative; }
+.hbar .fill { height: 10px; background: var(--s1); border-radius: 0 4px 4px 0; min-width: 2px; }
+.hbar .v { color: var(--ink2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.empty { color: var(--muted); font-size: 0.85rem; padding: 8px 0; }
+table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--grid); white-space: nowrap; }
+th { color: var(--ink2); font-weight: 600; font-size: 0.76rem; }
+td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
+.scroll { overflow-x: auto; }
+.heat { display: grid; grid-template-columns: 28px repeat(24, minmax(10px, 1fr)); gap: 2px; font-size: 0.68rem; color: var(--muted); }
+.heat .c { aspect-ratio: 1; border-radius: 2px; background: var(--grid); }
+.heat .hl { text-align: center; }
+.ret td.c { text-align: center; font-variant-numeric: tabular-nums; border-radius: 0; }
+.badge { display: inline-block; font-size: 0.7rem; padding: 0 6px; border-radius: 999px; border: 1px solid var(--ring); color: var(--ink2); }
+.badge.on { color: var(--good); border-color: var(--good); }
+footer { color: var(--muted); font-size: 0.78rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>High Ball 접속 현황</h1>
+    <span class="sub"><a href="../">← 성장 현황판</a> · <span id="updated">불러오는 중…</span></span>
+  </header>
+  <div id="notice"></div>
+
+  <section class="panel" aria-labelledby="h-live">
+    <div class="panel-head"><h2 id="h-live">실시간 접속</h2><span class="sub" id="live-sub"></span></div>
+    <div class="live">
+      <div class="live-big"><span class="dot" aria-hidden="true"></span><span class="n" id="online-n">–</span><span class="sub">명 지금 접속 중</span></div>
+      <div class="chips" id="online-activity"></div>
+      <div class="chips" id="online-country"></div>
+    </div>
+    <div class="scroll"><table id="online-table"></table></div>
+  </section>
+
+  <section class="kpis" id="kpis" aria-label="핵심 숫자"></section>
+
+  <section class="panel" aria-labelledby="h-trend">
+    <div class="panel-head">
+      <h2 id="h-trend">접속 추세</h2>
+      <div class="seg" role="group" aria-label="기간" id="trend-seg">
+        <button data-k="d14">일 · 14일</button><button data-k="d30" aria-pressed="true">일 · 30일</button><button data-k="d90">일 · 90일</button><button data-k="w">주 · 26주</button><button data-k="m">월 · 12개월</button>
+      </div>
+    </div>
+    <div class="legend" id="trend-legend"></div>
+    <div class="chart" id="trend-chart"></div>
+    <h3>게임 시간 (시간)</h3>
+    <div class="chart" id="time-chart"></div>
+    <div class="sub" id="trend-note"></div>
+  </section>
+
+  <div class="grid2">
+    <section class="panel" aria-labelledby="h-hour">
+      <div class="panel-head"><h2 id="h-hour">오늘 시간대별 접속자</h2><span class="sub">한국 시간</span></div>
+      <div class="legend"><span><i style="background:var(--s1)"></i>오늘</span><span><i style="background:var(--s2)"></i>어제</span></div>
+      <div class="chart" id="hour-chart"></div>
+    </section>
+    <section class="panel" aria-labelledby="h-heat">
+      <div class="panel-head"><h2 id="h-heat">요일 × 시간 접속 (최근 28일)</h2><span class="sub">세션 시작 수</span></div>
+      <div class="heat" id="heat"></div>
+    </section>
+  </div>
+
+  <div class="grid2">
+    <section class="panel" aria-labelledby="h-geo">
+      <div class="panel-head"><h2 id="h-geo">접속 지역 (최근 30일)</h2><span class="sub">사람 수 · 오늘</span></div>
+      <div class="hbars" id="countries"></div>
+    </section>
+    <section class="panel" aria-labelledby="h-freq">
+      <div class="panel-head"><h2 id="h-freq">자주 접속 (최근 30일)</h2><span class="sub">접속한 날 수별 사람 수</span></div>
+      <div class="chart" id="freq-chart"></div>
+      <h3>한 번 접속할 때 머문 시간</h3>
+      <div class="chart" id="len-chart"></div>
+    </section>
+  </div>
+
+  <section class="panel" aria-labelledby="h-type">
+    <div class="panel-head"><h2 id="h-type">접속 유형 (최근 30일)</h2><span class="sub">사람 수 기준</span></div>
+    <div class="grid3" id="types"></div>
+  </section>
+
+  <section class="panel" aria-labelledby="h-ret">
+    <div class="panel-head"><h2 id="h-ret">재방문 (가입일별)</h2><span class="sub">처음 켠 날 묶음이 N일 뒤에 다시 온 비율</span></div>
+    <div class="scroll"><table class="ret" id="retention"></table></div>
+  </section>
+
+  <div class="grid2">
+    <section class="panel" aria-labelledby="h-top">
+      <div class="panel-head"><h2 id="h-top">자주 오는 사람 (최근 30일)</h2></div>
+      <div class="scroll"><table id="top"></table></div>
+    </section>
+    <section class="panel" aria-labelledby="h-recent">
+      <div class="panel-head"><h2 id="h-recent">최근 접속 40건</h2></div>
+      <div class="scroll"><table id="recent"></table></div>
+    </section>
+  </div>
+
+  <footer id="foot"></footer>
+</div>
+<div class="tip" id="tip" role="status" aria-live="off"></div>
+
+<script>
+'use strict';
+const SUPABASE_URL = 'https://rtincmcpwmxkzfvcpfqk.supabase.co';
+const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ0aW5jbWNwd214a3pmdmNwZnFrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwNDU4MjEsImV4cCI6MjEwMjYyMTgyMX0.4-xV0-OySihacdb81L0VTQsRPfM5XVatUs437vbxk3E';
+const REFRESH_MS = 30000;
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const nf = new Intl.NumberFormat('ko-KR');
+const num = (n) => nf.format(Math.round(n || 0));
+let regionNames = null;
+try { regionNames = new Intl.DisplayNames(['ko'], { type: 'region' }); } catch (e) { /* 오래된 브라우저 */ }
+
+function accessKey() {
+  const m = location.hash.match(/k=([^&]+)/);
+  if (m) return decodeURIComponent(m[1]);
+  const p = location.pathname.match(/\/d\/([^/]+)\//);
+  return p ? decodeURIComponent(p[1]) : '';
+}
+
+function dur(sec) {
+  sec = Math.max(0, Math.round(sec || 0));
+  if (sec < 60) return sec + '초';
+  const m = Math.floor(sec / 60);
+  if (m < 60) return m + '분';
+  const h = Math.floor(m / 60), r = m % 60;
+  return h + '시간' + (r ? ' ' + r + '분' : '');
+}
+// 국기 이모지는 윈도우에서 글자 두 개로 보이므로 쓰지 않는다.
+function country(cc) {
+  if (!cc || cc === '??') return '알 수 없음';
+  let name = cc;
+  try { name = regionNames ? regionNames.of(cc) : cc; } catch (e) { /* 모르는 코드 */ }
+  return name === cc ? cc : `${name} (${cc})`;
+}
+const ACTIVITY = { main: '메인', stageselect: '스테이지 선택', play: '스테이지 플레이', play_room: '멀티 방 플레이', ranking: '랭킹', settings: '설정', multiplayer: '멀티 로비', '?': '알 수 없음' };
+const actName = (a) => ACTIVITY[a || '?'] || a;
+const SOURCE = { ip: '접속 IP', network: '통신망', sim: '유심', locale: '기기 지역 설정', '?': '알 수 없음' };
+const LANG = { ko: '한국어', en: '영어', '?': '알 수 없음' };
+const VISIT = { first: '첫 접속', repeat: '다시 접속' };
+function ago(ts) {
+  const s = (Date.now() - new Date(ts).getTime()) / 1000;
+  if (s < 60) return '방금';
+  if (s < 3600) return Math.floor(s / 60) + '분 전';
+  if (s < 86400) return Math.floor(s / 3600) + '시간 전';
+  return Math.floor(s / 86400) + '일 전';
+}
+function kTime(ts) {
+  return new Date(ts).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+
+// ── 툴팁 ─────────────────────────────────────────────────────────────
+const tip = $('tip');
+function showTip(ev, title, rows) {
+  tip.innerHTML = '<div class="t">' + esc(title) + '</div>' + rows.map((r) =>
+    '<div class="r"><span>' + (r.color ? '<i style="background:' + r.color + '"></i>' : '') + esc(r.k) + '</span><b>' + esc(r.v) + '</b></div>').join('');
+  tip.style.display = 'block';
+  const w = tip.offsetWidth, h = tip.offsetHeight;
+  let x = ev.clientX + 14, y = ev.clientY + 14;
+  if (x + w > innerWidth - 8) x = ev.clientX - w - 14;
+  if (y + h > innerHeight - 8) y = ev.clientY - h - 14;
+  tip.style.left = Math.max(8, x) + 'px'; tip.style.top = Math.max(8, y) + 'px';
+}
+function hideTip() { tip.style.display = 'none'; }
+
+// ── 차트 공통 ─────────────────────────────────────────────────────────
+const NS = 'http://www.w3.org/2000/svg';
+// 눈금 4칸이 둥근 값(1·2·2.5·5 ×10ⁿ)이 되게 위 끝을 정한다. 사람 수처럼 정수인 값은 눈금도 정수.
+function niceMax(v, integer) {
+  const raw = Math.max(v, integer ? 4 : 1e-9) / 4;
+  const p = Math.pow(10, Math.floor(Math.log10(raw)));
+  let step = 10 * p;
+  for (const m of [1, 2, 2.5, 5, 10]) if (m * p >= raw) { step = m * p; break; }
+  if (integer) step = Math.max(1, Math.ceil(step));
+  return step * 4;
+}
+function svgEl(tag, attrs) {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  return e;
+}
+function frame(host, H, maxV, yfmt) {
+  host.innerHTML = '';
+  const W = Math.max(280, host.clientWidth || 600);
+  const pad = { l: 44, r: 10, t: 10, b: 24 };
+  const svg = svgEl('svg', { viewBox: `0 0 ${W} ${H}`, height: H, role: 'img' });
+  const top = niceMax(maxV, !yfmt);
+  const y = (v) => pad.t + (H - pad.t - pad.b) * (1 - v / top);
+  for (let i = 0; i <= 4; i++) {
+    const v = top * i / 4, yy = y(v);
+    svg.appendChild(svgEl('line', { x1: pad.l, x2: W - pad.r, y1: yy, y2: yy, stroke: i === 0 ? css('--axis') : css('--grid'), 'stroke-width': 1 }));
+    const t = svgEl('text', { x: pad.l - 6, y: yy + 4, 'text-anchor': 'end', 'font-size': 11, fill: css('--muted') });
+    t.textContent = yfmt ? yfmt(v) : num(v);
+    svg.appendChild(t);
+  }
+  host.appendChild(svg);
+  return { svg, W, H, pad, y, top };
+}
+function xLabels(f, labels, xAt) {
+  const every = Math.max(1, Math.ceil(labels.length / Math.max(2, Math.floor((f.W - f.pad.l) / 64))));
+  labels.forEach((l, i) => {
+    if (i % every !== 0 && i !== labels.length - 1) return;
+    if (i !== labels.length - 1 && labels.length - 1 - i < every) return;
+    const t = svgEl('text', { x: xAt(i), y: f.H - 6, 'text-anchor': 'middle', 'font-size': 11, fill: css('--muted') });
+    t.textContent = l;
+    f.svg.appendChild(t);
+  });
+}
+
+// 선 그래프: series = [{name, color, values}], 십자선 + 툴팁
+function lineChart(host, { labels, titles, series, H = 220, vfmt = num }) {
+  // null = 아직 오지 않은 칸(선을 끊는다)
+  const maxV = Math.max(1, ...series.flatMap((s) => s.values.filter((v) => v != null)));
+  const f = frame(host, H, maxV);
+  const n = labels.length;
+  const xAt = (i) => n === 1 ? (f.pad.l + f.W - f.pad.r) / 2 : f.pad.l + (f.W - f.pad.l - f.pad.r) * i / (n - 1);
+  xLabels(f, labels, xAt);
+  for (const s of series) {
+    let d = '', pen = false, li = -1;
+    s.values.forEach((v, i) => {
+      if (v == null) { pen = false; return; }
+      d += (pen ? 'L' : 'M') + xAt(i).toFixed(1) + ' ' + f.y(v).toFixed(1) + ' ';
+      pen = true; li = i;
+    });
+    if (li < 0) continue;
+    f.svg.appendChild(svgEl('path', { d, fill: 'none', stroke: s.color, 'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }));
+    f.svg.appendChild(svgEl('circle', { cx: xAt(li), cy: f.y(s.values[li]), r: 4, fill: s.color, stroke: css('--surface'), 'stroke-width': 2 }));
+  }
+  const cross = svgEl('line', { y1: f.pad.t, y2: f.H - f.pad.b, stroke: css('--axis'), 'stroke-width': 1, visibility: 'hidden' });
+  f.svg.appendChild(cross);
+  const dots = series.map((s) => { const c = svgEl('circle', { r: 4, fill: s.color, stroke: css('--surface'), 'stroke-width': 2, visibility: 'hidden' }); f.svg.appendChild(c); return c; });
+  const hit = svgEl('rect', { x: f.pad.l, y: 0, width: f.W - f.pad.l - f.pad.r, height: f.H, fill: 'transparent' });
+  f.svg.appendChild(hit);
+  const move = (ev) => {
+    const r = f.svg.getBoundingClientRect();
+    const px = (ev.clientX - r.left) * f.W / r.width;
+    const i = Math.max(0, Math.min(n - 1, Math.round(n === 1 ? 0 : (px - f.pad.l) / (f.W - f.pad.l - f.pad.r) * (n - 1))));
+    cross.setAttribute('x1', xAt(i)); cross.setAttribute('x2', xAt(i)); cross.setAttribute('visibility', 'visible');
+    dots.forEach((c, k) => {
+      const v = series[k].values[i];
+      if (v == null) { c.setAttribute('visibility', 'hidden'); return; }
+      c.setAttribute('cx', xAt(i)); c.setAttribute('cy', f.y(v)); c.setAttribute('visibility', 'visible');
+    });
+    showTip(ev, (titles || labels)[i], series.map((s) => ({ k: s.name, v: s.values[i] == null ? '–' : vfmt(s.values[i]), color: s.color })));
+  };
+  hit.addEventListener('pointermove', move);
+  hit.addEventListener('pointerdown', move);
+  hit.addEventListener('pointerleave', () => { cross.setAttribute('visibility', 'hidden'); dots.forEach((c) => c.setAttribute('visibility', 'hidden')); hideTip(); });
+}
+
+// 세로 막대: 한 계열, 위쪽 4px 둥근 끝, 막대 사이 2px 이상 간격
+function barChart(host, { labels, titles, values, color, H = 170, vfmt = num, yfmt }) {
+  const maxV = Math.max(...values, 0) || 1;
+  const f = frame(host, H, maxV, yfmt);
+  const n = labels.length;
+  const slot = (f.W - f.pad.l - f.pad.r) / n;
+  const bw = Math.max(2, Math.min(36, slot - Math.max(2, slot * 0.25)));
+  const xAt = (i) => f.pad.l + slot * i + slot / 2;
+  xLabels(f, labels, xAt);
+  const base = f.y(0);
+  values.forEach((v, i) => {
+    const x = xAt(i) - bw / 2, yTop = f.y(v), h = base - yTop;
+    if (h > 0.5) {
+      const r = Math.min(4, bw / 2, h);
+      const d = `M${x} ${base} L${x} ${yTop + r} Q${x} ${yTop} ${x + r} ${yTop} L${x + bw - r} ${yTop} Q${x + bw} ${yTop} ${x + bw} ${yTop + r} L${x + bw} ${base} Z`;
+      f.svg.appendChild(svgEl('path', { d, fill: color }));
+    }
+    const hit = svgEl('rect', { x: f.pad.l + slot * i, y: f.pad.t, width: slot, height: base - f.pad.t, fill: 'transparent' });
+    const show = (ev) => showTip(ev, (titles || labels)[i], [{ k: '값', v: vfmt(v), color }]);
+    hit.addEventListener('pointermove', show); hit.addEventListener('pointerdown', show);
+    hit.addEventListener('pointerleave', hideTip);
+    f.svg.appendChild(hit);
+  });
+}
+
+// 가로 막대 목록 (HTML)
+function hbars(host, items, { label, value, extra, max = 8 } = {}) {
+  if (!items || !items.length) { host.innerHTML = '<div class="empty">아직 기록이 없습니다.</div>'; return; }
+  let list = items.slice();
+  if (list.length > max) {
+    const rest = list.slice(max - 1);
+    list = list.slice(0, max - 1);
+    list.push({ __other: true, users: rest.reduce((a, b) => a + (b.users || 0), 0), n: rest.length });
+  }
+  const total = items.reduce((a, b) => a + (b.users || 0), 0) || 1;
+  const top = Math.max(...list.map((x) => x.users || 0), 1);
+  host.innerHTML = list.map((x) => {
+    const k = x.__other ? `그 밖 ${x.n}개` : label(x);
+    const pct = Math.round((x.users || 0) * 100 / total);
+    return `<div class="hbar"><span class="k" title="${esc(k)}">${esc(k)}</span>` +
+      `<span class="track"><span class="fill" style="display:block;width:${((x.users || 0) * 100 / top).toFixed(1)}%"></span></span>` +
+      `<span class="v">${num(x.users)}명 · ${pct}%${!x.__other && extra ? ' · ' + esc(extra(x)) : ''}</span></div>`;
+  }).join('');
+}
+
+// ── 그리기 ────────────────────────────────────────────────────────────
+let DATA = null;
+let trendKey = 'd30';
+try { trendKey = localStorage.getItem('access.trend') || 'd30'; } catch (e) { /* 저장소 없음 */ }
+
+function delta(now, prev, label) {
+  if (prev == null) return '';
+  const d = now - prev;
+  const cls = d > 0 ? 'up' : d < 0 ? 'down' : '';
+  const head = d > 0 ? '▲ ' + num(d) : d < 0 ? '▼ ' + num(-d) : '변화 없음';
+  return `<span class="delta ${cls}">${head} (${label} ${num(prev)})</span>`;
+}
+
+function renderKpis(k) {
+  const stick = k.mau ? Math.round(k.dau_today * 100 / k.mau) : 0;
+  const perUser = k.tracked_users_today ? k.play_sec_today / k.tracked_users_today : 0;
+  const tiles = [
+    ['오늘 접속자 (DAU)', num(k.dau_today), delta(k.dau_today, k.dau_yesterday, '어제')],
+    ['최근 7일 (WAU)', num(k.wau), delta(k.wau, k.wau_prev, '그 전 7일')],
+    ['최근 30일 (MAU)', num(k.mau), '<span class="delta">누적 계정 ' + num(k.total_users) + '</span>'],
+    ['고착도 DAU/MAU', stick + '%', '<span class="delta">한 달 접속자 중 오늘 온 비율</span>'],
+    ['오늘 신규', num(k.new_today), delta(k.new_today, k.new_yesterday, '어제')],
+    ['오늘 재방문', num(k.returning_today), '<span class="delta">어제 이전 가입자 중 오늘 접속</span>'],
+    ['오늘 세션', num(k.sessions_today), '<span class="delta">앱을 연 횟수(5분 넘게 쉬면 새로)</span>'],
+    ['평균 세션 길이', dur(k.avg_session_sec_today), '<span class="delta">오늘</span>'],
+    ['오늘 총 게임 시간', dur(k.play_sec_today), '<span class="delta">그중 플레이 화면 ' + dur(k.game_sec_today) + '</span>'],
+    ['1인당 게임 시간', dur(perUser), '<span class="delta">오늘, 기록된 사람 기준</span>'],
+    ['24시간 활동 계정', num(k.auth_active_24h), '<span class="delta">로그인 갱신 기준(구버전 포함)</span>'],
+  ];
+  $('kpis').innerHTML = tiles.map(([l, v, d]) => `<div class="kpi"><span class="label">${esc(l)}</span><span class="value">${v}</span>${d}</div>`).join('');
+}
+
+function renderLive(d) {
+  const k = d.kpi, list = d.online || [];
+  $('online-n').textContent = num(k.online_now);
+  $('live-sub').textContent = `마지막 신호 ${Math.round(k.online_window_sec / 60 * 10) / 10}분 이내 · 30초마다 갱신`;
+  const group = (key, nameFn) => {
+    const m = new Map();
+    list.forEach((s) => m.set(s[key] || '?', (m.get(s[key] || '?') || 0) + 1));
+    return [...m.entries()].sort((a, b) => b[1] - a[1]).map(([kk, n]) => `<span class="chip">${esc(nameFn(kk))} <b>${n}</b></span>`).join('');
+  };
+  $('online-activity').innerHTML = group('activity', actName);
+  $('online-country').innerHTML = group('country', (c) => country(c === '?' ? null : c));
+  $('online-table').innerHTML = list.length
+    ? '<tr><th>이름</th><th>지금 화면</th><th>지역</th><th>기기</th><th>버전</th><th class="n">머문 시간</th></tr>' +
+      list.map((s) => `<tr><td>${esc(s.name)}${s.first ? ' <span class="badge">첫 접속</span>' : ''}</td><td>${esc(actName(s.activity))}</td><td>${esc(country(s.country))}</td><td>${esc(s.device || '')}</td><td>${esc(s.version || '')}</td><td class="n">${dur((Date.now() - new Date(s.started_at).getTime()) / 1000)}</td></tr>`).join('')
+    : '<tr><td class="empty">지금 접속 중인 사람이 없습니다.</td></tr>';
+}
+
+function trendData(d) {
+  const md = (s) => { const [, m, dd] = s.split('-'); return `${+m}/${+dd}`; };
+  if (trendKey === 'w') {
+    const rows = d.weekly;
+    return { rows, labels: rows.map((r) => md(r.w)), titles: rows.map((r) => md(r.w) + ' 주'), active: rows.map((r) => r.wau), activeName: '주간 접속자' };
+  }
+  if (trendKey === 'm') {
+    const rows = d.monthly;
+    return { rows, labels: rows.map((r) => `${+r.m.slice(5, 7)}월`), titles: rows.map((r) => r.m.slice(0, 7)), active: rows.map((r) => r.mau), activeName: '월간 접속자' };
+  }
+  const nDays = trendKey === 'd14' ? 14 : trendKey === 'd90' ? 90 : 30;
+  const rows = d.daily.slice(-nDays);
+  const wd = ['일', '월', '화', '수', '목', '금', '토'];
+  return { rows, labels: rows.map((r) => md(r.d)), titles: rows.map((r) => `${md(r.d)} (${wd[new Date(r.d + 'T00:00:00').getDay()]})`), active: rows.map((r) => r.dau), activeName: '일간 접속자' };
+}
+
+function renderTrend(d) {
+  document.querySelectorAll('#trend-seg button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.k === trendKey)));
+  const t = trendData(d);
+  const series = [
+    { name: t.activeName, color: css('--s1'), values: t.active },
+    { name: '신규', color: css('--s2'), values: t.rows.map((r) => r.new) },
+    { name: '세션 수', color: css('--s3'), values: t.rows.map((r) => r.sessions) },
+  ];
+  $('trend-legend').innerHTML = series.map((s) => `<span><i style="background:${s.color}"></i>${esc(s.name)}</span>`).join('');
+  lineChart($('trend-chart'), { labels: t.labels, titles: t.titles, series });
+  barChart($('time-chart'), {
+    labels: t.labels, titles: t.titles, values: t.rows.map((r) => (r.play_sec || 0) / 3600), color: css('--s1'),
+    vfmt: (v) => dur(v * 3600), yfmt: (v) => (v >= 10 ? Math.round(v) : Math.round(v * 10) / 10) + 'h',
+  });
+}
+
+function renderHourly(d) {
+  const rows = d.hourly || [];
+  const nowH = +new Date().toLocaleString('en-US', { timeZone: 'Asia/Seoul', hour: 'numeric', hour12: false }) % 24;
+  lineChart($('hour-chart'), {
+    labels: rows.map((r) => r.h + '시'), titles: rows.map((r) => `${r.h}:00–${r.h}:59`), H: 190,
+    series: [
+      { name: '오늘', color: css('--s1'), values: rows.map((r) => (r.h <= nowH ? r.today : null)) },
+      { name: '어제', color: css('--s2'), values: rows.map((r) => r.yesterday) },
+    ],
+    vfmt: (v) => num(v) + '명',
+  });
+}
+
+function renderHeat(d) {
+  const cells = new Map((d.heatmap || []).map((c) => [c.dow + ':' + c.h, c.n]));
+  const max = Math.max(1, ...cells.values());
+  const steps = ['--seq1', '--seq2', '--seq3', '--seq4', '--seq5', '--seq6'].map(css);
+  const days = ['월', '화', '수', '목', '금', '토', '일'];
+  let html = '<span></span>' + Array.from({ length: 24 }, (_, h) => `<span class="hl">${h % 3 === 0 ? h : ''}</span>`).join('');
+  for (let dow = 1; dow <= 7; dow++) {
+    html += `<span>${days[dow - 1]}</span>`;
+    for (let h = 0; h < 24; h++) {
+      const n = cells.get(dow + ':' + h) || 0;
+      const bg = n ? steps[Math.min(5, Math.floor(n / max * 5.999))] : '';
+      html += `<span class="c" data-t="${days[dow - 1]}요일 ${h}시" data-n="${n}"${bg ? ` style="background:${bg}"` : ''}></span>`;
+    }
+  }
+  const host = $('heat');
+  host.innerHTML = html;
+  host.querySelectorAll('.c').forEach((c) => {
+    const show = (ev) => showTip(ev, c.dataset.t, [{ k: '세션 시작', v: num(+c.dataset.n) + '회' }]);
+    c.addEventListener('pointermove', show); c.addEventListener('pointerdown', show);
+    c.addEventListener('pointerleave', hideTip);
+  });
+}
+
+function renderTypes(d) {
+  const t = d.types || {};
+  const groups = [
+    ['플랫폼', 'platform', (x) => ({ android: '안드로이드', ios: 'iOS', editor: '에디터(개발)' }[x.k] || x.k)],
+    ['신규 / 재방문 (세션)', 'visit', (x) => VISIT[x.k] || x.k],
+    ['마지막으로 본 화면', 'activity', (x) => actName(x.k)],
+    ['앱 버전', 'version', (x) => x.k],
+    ['언어', 'language', (x) => LANG[x.k] || x.k],
+    ['기기', 'device', (x) => x.k],
+    ['운영체제', 'os', (x) => x.k],
+    ['지역 판정 방법', 'source', (x) => SOURCE[x.k] || x.k],
+  ];
+  const host = $('types');
+  host.innerHTML = groups.map(([title, key]) => `<div><h3>${esc(title)}</h3><div class="hbars" data-k="${key}"></div></div>`).join('');
+  groups.forEach(([, key, label]) => hbars(host.querySelector(`[data-k="${key}"]`), t[key] || [], { label, extra: (x) => num(x.sessions) + '회' }));
+}
+
+function renderRetention(d) {
+  const rows = (d.retention || []).slice().reverse();
+  const steps = ['--seq1', '--seq2', '--seq3', '--seq4', '--seq5', '--seq6'].map(css);
+  const cell = (n, size) => {
+    if (n == null) return '<td class="c" style="color:var(--muted)">–</td>';
+    const p = size ? n / size : 0;
+    const i = Math.min(5, Math.floor(p * 6));
+    const dark = i >= 3;
+    return `<td class="c" style="background:${p ? steps[i] : 'transparent'};color:${p && dark ? '#fff' : 'var(--ink)'}" title="${n}/${size}명">${Math.round(p * 100)}%</td>`;
+  };
+  if (!rows.length) { $('retention').innerHTML = '<tr><td class="empty">최근 30일 가입자가 없습니다.</td></tr>'; return; }
+  const sum = (k) => rows.reduce((a, r) => a + (r[k] == null ? 0 : r[k]), 0);
+  const base = (k) => rows.reduce((a, r) => a + (r[k] == null ? 0 : r.size), 0);
+  const avg = (k) => base(k) ? cell(sum(k), base(k)) : cell(null, 0);
+  $('retention').innerHTML = '<tr><th>가입일</th><th class="n">인원</th><th>다음날</th><th>3일 뒤</th><th>7일 뒤</th><th>14일 뒤</th><th>한 번이라도</th></tr>' +
+    `<tr><td><b>평균</b></td><td class="n"><b>${num(rows.reduce((a, r) => a + r.size, 0))}</b></td>${avg('d1')}${avg('d3')}${avg('d7')}${avg('d14')}${cell(sum('any'), rows.reduce((a, r) => a + r.size, 0))}</tr>` +
+    rows.map((r) => `<tr><td>${r.d.slice(5).replace('-', '/')}</td><td class="n">${num(r.size)}</td>${cell(r.d1, r.size)}${cell(r.d3, r.size)}${cell(r.d7, r.size)}${cell(r.d14, r.size)}${cell(r.any, r.size)}</tr>`).join('');
+}
+
+function renderTables(d) {
+  const top = d.top_users || [];
+  $('top').innerHTML = top.length
+    ? '<tr><th>#</th><th>이름</th><th class="n">접속일</th><th class="n">세션</th><th class="n">게임 시간</th><th>지역</th><th>마지막</th></tr>' +
+      top.map((u, i) => `<tr><td>${i + 1}</td><td>${esc(u.name)}${u.online ? ' <span class="badge on">접속 중</span>' : ''}</td><td class="n">${num(u.days)}일</td><td class="n">${num(u.sessions)}</td><td class="n">${dur(u.play_sec)}</td><td>${esc(country(u.country))}</td><td>${esc(u.last_d.slice(5).replace('-', '/'))}</td></tr>`).join('')
+    : '<tr><td class="empty">아직 기록이 없습니다.</td></tr>';
+  const rec = d.recent || [];
+  $('recent').innerHTML = rec.length
+    ? '<tr><th>시작</th><th>이름</th><th class="n">머문 시간</th><th>지역</th><th>기기</th><th>버전</th></tr>' +
+      rec.map((s) => `<tr><td>${esc(kTime(s.started_at))}</td><td>${esc(s.name)}${s.online ? ' <span class="badge on">접속 중</span>' : ''}${s.first ? ' <span class="badge">첫 접속</span>' : ''}</td><td class="n">${dur(s.active_sec)}</td><td>${esc(country(s.country))}</td><td>${esc(s.device || '')}</td><td>${esc(s.version || '')}</td></tr>`).join('')
+    : '<tr><td class="empty">새 버전 앱의 접속 기록이 아직 없습니다.</td></tr>';
+}
+
+function renderAll() {
+  const d = DATA;
+  if (!d) return;
+  const k = d.kpi;
+  $('updated').textContent = '갱신 ' + kTime(k.generated_at) + ' (한국 시간)';
+  $('notice').innerHTML = k.tracking_since
+    ? ''
+    : '<div class="notice">접속 기록(세션·게임 시간·지역·기기·실시간)은 접속 기록이 들어간 새 버전 앱부터 쌓입니다. 그 전 기간의 접속자 수는 플레이 기록(스테이지·멀티 제출)과 가입 시각으로 셉니다.</div>';
+  renderLive(d);
+  renderKpis(k);
+  renderTrend(d);
+  renderHourly(d);
+  renderHeat(d);
+  hbars($('countries'), d.countries || [], { label: (x) => country(x.k), extra: (x) => '오늘 ' + num(x.today), max: 10 });
+  barChart($('freq-chart'), { labels: (d.frequency || []).map((x) => x.k), values: (d.frequency || []).map((x) => x.users), color: css('--s1'), H: 150, vfmt: (v) => num(v) + '명' });
+  barChart($('len-chart'), { labels: (d.session_length || []).map((x) => x.k), values: (d.session_length || []).map((x) => x.sessions), color: css('--s3'), H: 150, vfmt: (v) => num(v) + '회' });
+  renderTypes(d);
+  renderRetention(d);
+  renderTables(d);
+  $('foot').textContent = `접속자 = 그날 앱을 켰거나(새 버전) 스테이지·멀티 기록을 낸 사람. 하루 경계는 한국 자정. 신규 = 그날 처음 앱을 켜 계정이 생긴 사람. 접속 기록 시작: ${k.tracking_since ? kTime(k.tracking_since) : '아직 없음'} · 누적 세션 ${num(k.total_sessions)}건.`;
+  $('trend-note').textContent = k.tracking_since ? '' : '게임 시간·세션 수는 새 버전 앱의 접속 기록부터 채워집니다.';
+}
+
+async function load() {
+  const key = accessKey();
+  if (!key || SUPABASE_URL.startsWith('__')) {
+    $('notice').innerHTML = '<div class="notice err">이 페이지는 publish.js 로 공개된 주소에서만 열립니다.</div>';
+    return;
+  }
+  try {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/rpc/get_access_dashboard', {
+      method: 'POST',
+      headers: { apikey: ANON_KEY, Authorization: 'Bearer ' + ANON_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ p_key: key }),
+      cache: 'no-store',
+    });
+    if (res.status === 404) throw new Error('DB 에 049_app_sessions.sql 이 아직 적용되지 않았습니다.');
+    const body = await res.json().catch(() => null);
+    if (!res.ok) throw new Error(body && /forbidden/.test(body.message || '') ? '열쇠가 맞지 않습니다(주소를 확인하세요).' : (body && body.message) || ('HTTP ' + res.status));
+    DATA = body;
+    renderAll();
+  } catch (e) {
+    $('notice').innerHTML = '<div class="notice err">불러오기 실패: ' + esc(e.message) + '</div>';
+    if (!DATA) $('updated').textContent = '불러오기 실패';
+  }
+}
+
+$('trend-seg').addEventListener('click', (ev) => {
+  const b = ev.target.closest('button');
+  if (!b) return;
+  trendKey = b.dataset.k;
+  try { localStorage.setItem('access.trend', trendKey); } catch (e) { /* 저장소 없음 */ }
+  if (DATA) renderTrend(DATA);
+});
+let resizeTimer = 0;
+addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(renderAll, 150); });
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', renderAll);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) load(); });
+setInterval(() => { if (!document.hidden) load(); }, REFRESH_MS);
+load();
+</script>
+</body>
+</html>
