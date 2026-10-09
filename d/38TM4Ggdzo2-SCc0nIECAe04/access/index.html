@@ -539,8 +539,8 @@ function renderTables(d) {
     : '<tr><td class="empty">아직 기록이 없습니다.</td></tr>';
   const rec = d.recent || [];
   $('recent').innerHTML = rec.length
-    ? '<tr><th>시작</th><th>이름</th><th class="n">머문 시간</th><th>지역</th><th>기기</th><th>버전</th></tr>' +
-      rec.map((s) => `<tr><td>${esc(kTime(s.started_at))}</td><td>${esc(s.name)}${s.online ? ' <span class="badge on">접속 중</span>' : ''}${s.first ? ' <span class="badge">첫 접속</span>' : ''}</td><td class="n">${dur(s.active_sec)}</td><td>${esc(country(s.country))}</td><td>${esc(s.device || '')}</td><td>${esc(s.version || '')}</td></tr>`).join('')
+    ? '<tr><th>시작</th><th>이름</th><th class="n">완료</th><th class="n">머문 시간</th><th>지역</th><th>기기</th><th>버전</th></tr>' +
+      rec.map((s) => `<tr><td>${esc(kTime(s.started_at))}</td><td>${esc(s.name)}${s.online ? ' <span class="badge on">접속 중</span>' : ''}${s.first ? ' <span class="badge">첫 접속</span>' : ''}</td><td class="n">${s.cleared ? num(s.cleared) + '판' : '-'}</td><td class="n">${dur(s.active_sec)}</td><td>${esc(country(s.country))}</td><td>${esc(s.device || '')}</td><td>${esc(s.version || '')}</td></tr>`).join('')
     : '<tr><td class="empty">새 버전 앱의 접속 기록이 아직 없습니다.</td></tr>';
 }
 
