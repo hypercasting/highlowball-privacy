@@ -421,9 +421,11 @@ function renderLive(d) {
   };
   $('online-activity').innerHTML = group('activity', actName);
   $('online-country').innerHTML = group('country', (c) => country(c === '?' ? null : c));
+  // 054: 지금 하는 스테이지 — 멀티면 "멀티", 아니면 "N번째"(모르면 -).
+  const stageOf = (s) => s.multi ? '멀티' : (s.stage ? `${num(s.stage)}번째` : '-');
   $('online-table').innerHTML = list.length
-    ? '<tr><th>이름</th><th>지금 화면</th><th>지역</th><th>기기</th><th>버전</th><th class="n">머문 시간</th></tr>' +
-      list.map((s) => `<tr><td>${esc(s.name)}${s.first ? ' <span class="badge">첫 접속</span>' : ''}</td><td>${esc(actName(s.activity))}</td><td>${esc(country(s.country))}</td><td>${esc(s.device || '')}</td><td>${esc(s.version || '')}</td><td class="n">${dur((Date.now() - new Date(s.started_at).getTime()) / 1000)}</td></tr>`).join('')
+    ? '<tr><th>이름</th><th>지금 화면</th><th>스테이지</th><th>지역</th><th>기기</th><th>버전</th><th class="n">머문 시간</th></tr>' +
+      list.map((s) => `<tr><td>${esc(s.name)}${s.first ? ' <span class="badge">첫 접속</span>' : ''}</td><td>${esc(actName(s.activity))}</td><td>${s.multi ? '<span class="badge on">멀티</span>' : esc(stageOf(s))}</td><td>${esc(country(s.country))}</td><td>${esc(s.device || '')}</td><td>${esc(s.version || '')}</td><td class="n">${dur((Date.now() - new Date(s.started_at).getTime()) / 1000)}</td></tr>`).join('')
     : '<tr><td class="empty">지금 접속 중인 사람이 없습니다.</td></tr>';
 }
 
